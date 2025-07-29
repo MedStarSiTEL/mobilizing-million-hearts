@@ -1,7 +1,6 @@
 # Mobilizing Million Hearts
 
 Mobilizing Million Hearts is a portable SMART On FHIR powered application to calculate and display the risk of having cardiac issues.
-Funded under ONC’s 2018 Leading Edge Acceleration Projects in Health IT program, MedstarHealth Research Institute developed the Mobilizing Million Hearts SMART on FHIR application that includes two highly usable and supportive tools to address atherosclerotic cardiovascular disease (ASCVD) risk at the point of care. By leveraging SMART on FHIR, it can be configured to work at any healthcare organization
 
 ![ASCVD Risk Estimator](resources/estimator.png)
 
