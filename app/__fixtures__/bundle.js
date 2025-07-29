@@ -15,7 +15,6 @@ const bundleFixture = resources => {
 	};
 };
 
-module.exports = {
-	bundle: bundleFixture(),
-	bundleFixture,
-};
+export const bundle = bundleFixture();
+export { bundleFixture };
+export default { bundle: bundle, bundleFixture };

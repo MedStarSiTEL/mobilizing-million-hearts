@@ -1,7 +1,7 @@
 import React from 'react';
 import Slider from 'rc-slider';
 
-import Handle from '../Handle/Handle';
+import Handle from '../Handle/Handle.jsx';
 
 export default class SliderFormElement extends React.Component {
 	constructor(props) {

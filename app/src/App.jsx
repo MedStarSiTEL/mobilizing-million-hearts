@@ -16,11 +16,11 @@ import { calculateRiskCard, canCalculateScore } from './ascvd/ASCVDValidator';
 
 import AuditEventService from './services/AuditEventService';
 import ErrorTranslator from './services/ErrorTranslator';
-import Disclaimer from './components/Disclaimer/Disclaimer';
-import DeveloperLog from './components/DeveloperInfo/DeveloperLog';
-import Educator from './components/Educator/Educator';
-import Estimator from './components/Estimator/Estimator';
-import Loader from './components/Loader/Loader';
+import Disclaimer from './components/Disclaimer/Disclaimer.jsx';
+import DeveloperLog from './components/DeveloperInfo/DeveloperLog.jsx';
+import Educator from './components/Educator/Educator.jsx';
+import Estimator from './components/Estimator/Estimator.jsx';
+import Loader from './components/Loader/Loader.jsx';
 import PatientInfo from './ascvd/PatientInfo';
 import RiskService from './services/RiskService';
 import { computeTenYearScore } from './ascvd/ASCVDRisk';

@@ -3,12 +3,12 @@ import React, { Component } from 'react';
 
 import { AFRICAN_AMERICAN, FEMALE, IS_SMOKER, WHITE } from '../../ascvd/ASCVDRisk';
 
-import FormElement from '../FormElement/FormElement';
-import HalfGroup from '../HalfGroup/HalfGroup';
-import Feedback from '../Feedback/Feedback';
+import FormElement from '../FormElement/FormElement.jsx';
+import HalfGroup from '../HalfGroup/HalfGroup.jsx';
+import Feedback from '../Feedback/Feedback.jsx';
 
-import MissingFields from '../MissingFields/MissingFields';
-import RiskCard from '../RiskCard/RiskCard';
+import MissingFields from '../MissingFields/MissingFields.jsx';
+import RiskCard from '../RiskCard/RiskCard.jsx';
 
 import { features, gitLastUpdated } from '../../config';
 import { VALIDATION } from '../../common/constants';

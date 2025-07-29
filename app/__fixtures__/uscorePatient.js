@@ -1,4 +1,4 @@
-module.exports = {
+const uscorePatientData = {
 	resourceType: 'Patient',
 	id: '11026239',
 	meta: {
@@ -206,3 +206,5 @@ module.exports = {
 		},
 	],
 };
+
+export default uscorePatientData;

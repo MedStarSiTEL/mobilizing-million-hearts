@@ -268,7 +268,6 @@ const patientFixture = ({ race, name, gender, birthDate, raw } = {}) => {
 	return !raw ? { fullUrl: 'https://example.com', resource: resource } : resource;
 };
 
-module.exports = {
-	patient: patientFixture(),
-	patientFixture,
-};
+export const patient = patientFixture();
+export { patientFixture };
+export default { patient: patient, patientFixture };

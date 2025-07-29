@@ -1,4 +1,4 @@
-module.exports = {
+const pastSmokerData = {
 	observations: [
 		{
 			fullUrl:
@@ -15433,3 +15433,5 @@ module.exports = {
 		},
 	],
 };
+
+export default pastSmokerData;
