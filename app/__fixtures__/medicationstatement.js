@@ -147,7 +147,6 @@ const medicationStatementFixture = options => {
 	return !raw ? { fullUrl: 'https://example/com', resource: resource } : resource;
 };
 
-module.exports = {
-	medicationStatement: medicationStatementFixture(),
-	medicationStatementFixture,
-};
+export const medicationStatement = medicationStatementFixture();
+export { medicationStatementFixture };
+export default { medicationStatement: medicationStatement, medicationStatementFixture };

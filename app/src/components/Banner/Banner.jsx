@@ -1,5 +1,5 @@
 import React from 'react';
-import RiskCard from '../RiskCard/RiskCard';
+import RiskCard from '../RiskCard/RiskCard.jsx';
 
 const Banner = (props) => {
 	const { estimatedRisk, riskText, color } = props;

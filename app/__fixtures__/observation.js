@@ -137,7 +137,6 @@ const observationFixture = options => {
 	return !raw ? { fullUrl: 'https://example.com', resource: resource } : resource;
 };
 
-module.exports = {
-	observation: observationFixture(),
-	observationFixture,
-};
+export const observation = observationFixture();
+export { observationFixture };
+export default { observation: observation, observationFixture };

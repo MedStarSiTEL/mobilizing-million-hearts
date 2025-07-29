@@ -69,7 +69,6 @@ const conditionFixture = options => {
 	return !raw ? { fullUrl: 'https://example.com', resource: resource } : resource;
 };
 
-module.exports = {
-	condition: conditionFixture(),
-	conditionFixture,
-};
+export const condition = conditionFixture();
+export { conditionFixture };
+export default { condition: condition, conditionFixture };

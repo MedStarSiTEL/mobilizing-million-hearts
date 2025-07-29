@@ -1,4 +1,4 @@
-module.exports = {
+const fhirCodes = {
 	patient: {
 		race: {
 			africanAmerican: ['2058-6', '2054-5'],
@@ -2232,3 +2232,5 @@ module.exports = {
 		},
 	},
 };
+
+export default fhirCodes;

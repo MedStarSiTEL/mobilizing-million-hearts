@@ -21,12 +21,12 @@ import {
 } from '../../ascvd/ASCVDValidator';
 
 import AuditEventService from '../../services/AuditEventService';
-import ButtonGroupElement from '../ButtonGroupElement/ButtonGroupElement';
-import Chart from '../Chart/Chart';
-import MissingFields from '../MissingFields/MissingFields';
-import SliderFormElement from '../SliderFormElement/SliderFormElement';
-import TextInput from '../TextInput/TextInput';
-import Banner from '../Banner/Banner';
+import ButtonGroupElement from '../ButtonGroupElement/ButtonGroupElement.jsx';
+import Chart from '../Chart/Chart.jsx';
+import MissingFields from '../MissingFields/MissingFields.jsx';
+import SliderFormElement from '../SliderFormElement/SliderFormElement.jsx';
+import TextInput from '../TextInput/TextInput.jsx';
+import Banner from '../Banner/Banner.jsx';
 
 const copy = (obj) => {
 	return JSON.parse(JSON.stringify(obj));
