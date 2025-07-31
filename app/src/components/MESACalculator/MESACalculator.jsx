@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import React, { useState, useCallback, useEffect } from 'react';
 
-import { AFRICAN_AMERICAN, FEMALE, IS_SMOKER, WHITE } from '../../ascvd/ASCVDRisk';
+import { AFRICAN_AMERICAN, FEMALE, IS_SMOKER, WHITE, HISPANIC, CHINESE_AMERICAN } from '../../ascvd/MESARisk';
 
 import FormElement from '../FormElement/FormElement.jsx';
 import HalfGroup from '../HalfGroup/HalfGroup.jsx';
@@ -11,7 +11,6 @@ import MissingFields from '../MissingFields/MissingFields.jsx';
 import RiskCard from '../RiskCard/RiskCard.jsx';
 
 import { features, gitLastUpdated } from '../../config';
-import { VALIDATION } from '../../common/constants';
 
 const { feedback } = features;
 
@@ -39,8 +38,8 @@ const formatDate = (date) => {
 	return [month, day, year].join('/');
 };
 
-export default function Estimator(props) {
-	const { patientInfo, submitUserFeedback, loading, goToEducator, goToMESACalculator, goToMedstarGuidelines, goToACCGuidelines } = props;
+export default function MESACalculator(props) {
+	const { patientInfo, submitUserFeedback, loading, mesaRisk, mesaRiskText, mesaBackgroundColor, mesaMissingData, mesaMissingFields, goToEducator, goToEstimator } = props;
 	
 	const [feedbackModal, setFeedbackModal] = useState(false);
 	const [notes, setNotes] = useState('');
@@ -61,20 +60,17 @@ export default function Estimator(props) {
 	}, []);
 
 	const handleSubmitUserFeedback = useCallback(() => {
-		const { risk, riskText } = props;
 		const feedbackNotes = notes || '';
-		submitUserFeedback({ risk, notes: feedbackNotes, riskText });
-	}, [props, notes, submitUserFeedback]);
+		submitUserFeedback({ risk: mesaRisk?.tenYearCHDRisk, notes: feedbackNotes, riskText: mesaRiskText });
+	}, [mesaRisk, notes, mesaRiskText, submitUserFeedback]);
 
 	const gitLastUpdatedDate = new Date(gitLastUpdated);
 
 	const missingValue = '--';
 
 	const systolic = get(patientInfo, 'systolicBloodPressure.value', missingValue);
-	const diastolic = get(patientInfo, 'diastolicBloodPressure.value', missingValue);
 	const totalCholesterol = get(patientInfo, 'totalCholesterol.value', missingValue);
 	const hdl = get(patientInfo, 'hdl.value', missingValue);
-	const ldl = get(patientInfo, 'ldl.value', missingValue);
 	const age = get(patientInfo, 'age', missingValue);
 
 	const diabetic = get(patientInfo, 'relatedFactors.diabetic');
@@ -100,17 +96,26 @@ export default function Estimator(props) {
 			case AFRICAN_AMERICAN:
 				raceDisplay = 'African American';
 				break;
+			case HISPANIC:
+				raceDisplay = 'Hispanic';
+				break;
+			case CHINESE_AMERICAN:
+				raceDisplay = 'Chinese American';
+				break;
 			default:
 				raceDisplay = 'Other';
 		}
 	}
 
-	const infoText = !props.missingData ? (
+	const infoText = !mesaMissingData ? (
 		<div className="col-md-12 pt-3 pb-3">
 			<p>
-				The patient's ASCVD risk score was calculated during the exam using the ACC's ASCVD Risk
-				Estimator Plus. The patient's risk score was found to be {props.risk}, indicating a{' '}
-				{props.riskText} level of 10 year ASCVD risk.
+				The patient's MESA CHD risk score was calculated during the exam using the Multi-Ethnic Study of Atherosclerosis (MESA) risk calculator. 
+				The patient's 10-year CHD risk score was found to be {mesaRisk?.tenYearCHDRisk}%, indicating a{' '}
+				{mesaRiskText} level of coronary heart disease risk.
+				{mesaRisk?.coronaryAge && (
+					<> The patient's coronary age is estimated to be {mesaRisk.coronaryAge} years.</>
+				)}
 			</p>
 		</div>
 	) : null;
@@ -122,18 +127,7 @@ export default function Estimator(props) {
 				? 'Yes'
 				: 'No'
 			: missingValue;
-	const statin =
-		patientInfo && patientInfo.statin != null
-			? patientInfo.statin === true
-				? 'Yes'
-				: 'No'
-			: missingValue;
-	const aspirin =
-		patientInfo && patientInfo.aspirin != null
-			? patientInfo.aspirin === true
-				? 'Yes'
-				: 'No'
-			: missingValue;
+
 	const relativeCholesterolDate =
 		patientInfo && patientInfo.cholesterolRelativeDate
 			? patientInfo.cholesterolRelativeDate
@@ -150,33 +144,20 @@ export default function Estimator(props) {
 	let banner;
 	if (!loading) {
 		banner =
-			props.missingData === false ? (
+			mesaMissingData === false ? (
 				<div className="col-md-12 text-center" style={{ fontSize: '14px' }}>
-					Risk of Having a Heart Attack or Stroke within 10 Years
+					Risk of Having Coronary Heart Disease within 10 Years
 				</div>
 			) : (
-				<MissingFields simple fields={props.missingFields} />
+				<MissingFields simple fields={mesaMissingFields || []} />
 			);
 	}
 
-	const {
-		totalCholesterol: totalCholesterolValidation,
-		systolicBloodPressure,
-		hdlCholesterol,
-		diastolicBloodPressure,
-		ldlCholesterol,
-		age: ageValidation,
-	} = VALIDATION;
-
-	const [totalCholesterolNotFound, totalCholestrolOutOfRange] = totalCholesterolValidation;
-	const [systolicBloodPressureNotFound, systolicBloodPressureOutOfRange] = systolicBloodPressure;
-	const [hdlCholesterolNotFound, hdlCholesterolOutOfRange] = hdlCholesterol;
-	const [
-		diastolicBloodPressureNotFound,
-		diastolicBloodPressureOutOfRange,
-	] = diastolicBloodPressure;
-	const [ldlCholesterolNotFound, ldlCholesterolOutOfRange] = ldlCholesterol;
-	const [ageNotFound, ageOutOfRange] = ageValidation;
+	// MESA validation ranges
+	const totalCholesterolValidRange = [130, 320];
+	const systolicBloodPressureValidRange = [90, 200];
+	const hdlCholesterolValidRange = [20, 100];
+	const ageValidRange = [45, 85];
 
 	return (
 		<React.Fragment>
@@ -194,10 +175,8 @@ export default function Estimator(props) {
 								name="Total Cholesterol (mg/dL):"
 								value={totalCholesterol}
 								date={cholesterolDate}
-								notFound={totalCholesterolNotFound}
-								outOfRange={totalCholestrolOutOfRange}
-								min={130}
-								max={320}
+								min={totalCholesterolValidRange[0]}
+								max={totalCholesterolValidRange[1]}
 								loading={loading}
 								dateHover
 							/>
@@ -205,21 +184,8 @@ export default function Estimator(props) {
 								name="HDL Cholesterol (mg/dL):"
 								value={hdl}
 								date={cholesterolDate}
-								notFound={hdlCholesterolNotFound}
-								outOfRange={hdlCholesterolOutOfRange}
-								min={20}
-								max={100}
-								loading={loading}
-								dateHover
-							/>
-							<FormElement
-								name="LDL Cholesterol (mg/dL):"
-								value={ldl}
-								date={cholesterolDate}
-								notFound={ldlCholesterolNotFound}
-								outOfRange={ldlCholesterolOutOfRange}
-								min={30}
-								max={300}
+								min={hdlCholesterolValidRange[0]}
+								max={hdlCholesterolValidRange[1]}
 								loading={loading}
 								dateHover
 							/>
@@ -230,21 +196,8 @@ export default function Estimator(props) {
 								name="Systolic Blood Pressure (mmHg):"
 								value={systolic}
 								date={bloodPressureDate}
-								notFound={systolicBloodPressureNotFound}
-								outOfRange={systolicBloodPressureOutOfRange}
-								min={90}
-								max={200}
-								loading={loading}
-								dateHover
-							/>
-							<FormElement
-								name="Diastolic Blood Pressure (mmHg):"
-								value={diastolic}
-								date={bloodPressureDate}
-								notFound={diastolicBloodPressureNotFound}
-								outOfRange={diastolicBloodPressureOutOfRange}
-								min={60}
-								max={130}
+								min={systolicBloodPressureValidRange[0]}
+								max={systolicBloodPressureValidRange[1]}
 								loading={loading}
 								dateHover
 							/>
@@ -255,25 +208,17 @@ export default function Estimator(props) {
 							<FormElement
 								name="Age:"
 								value={age}
-								notFound={ageNotFound}
-								outOfRange={ageOutOfRange}
 								loading={loading}
-								min={40}
-								max={79}
+								min={ageValidRange[0]}
+								max={ageValidRange[1]}
 							/>
 							<FormElement name="Sex:" value={sexDisplay} />
-							<FormElement name="Race:" value={raceDisplay} />
+							<FormElement name="Race/Ethnicity:" value={raceDisplay} />
 						</HalfGroup>
 						<HalfGroup>
 							<FormElement name="History of Diabetes:" value={diabeticDisplay} />
 							<FormElement name="Smoker:" value={smokerDisplay} padding={15} />
-						</HalfGroup>
-					</div>
-					<div className="row line-bottom">
-						<HalfGroup>
 							<FormElement name="Hypertension Treatment:" value={hypertensionTreatmentDisplay} />
-							<FormElement name="Statin:" value={statin} />
-							<FormElement name="Aspirin Therapy:" value={aspirin} />
 						</HalfGroup>
 					</div>
 				</div>
@@ -281,10 +226,15 @@ export default function Estimator(props) {
 					{banner}
 					<div className="col-md-12 pt-3 pb-3">
 						<RiskCard
-							risk={props.risk}
-							riskText={props.riskText}
-							backgroundColor={props.backgroundColor}
+							risk={mesaRisk?.tenYearCHDRisk}
+							riskText={mesaRiskText}
+							backgroundColor={mesaBackgroundColor}
 						/>
+						{mesaRisk?.coronaryAge && !mesaMissingData && (
+							<div className="text-center mt-3">
+								<small><strong>Coronary Age: {mesaRisk.coronaryAge} years</strong></small>
+							</div>
+						)}
 					</div>
 					{!loading ? (
 						<>
@@ -307,31 +257,11 @@ export default function Estimator(props) {
 				<div className="col-md-2 pt-2" style={{ textAlign: 'center' }}>
 					<button
 						type="button"
-						onClick={goToMESACalculator}
+						onClick={goToEstimator}
 						className="btn btn-link"
 						style={{ padding: 0 }}
 					>
-						<h4 style={{ fontSize: '16px' }}>MESA Calculator</h4>
-					</button>
-				</div>
-				<div className="col-md-2 pt-2" style={{ textAlign: 'center' }}>
-					<button
-						type="button"
-						onClick={goToACCGuidelines}
-						className="btn btn-link"
-						style={{ padding: 0 }}
-					>
-						<h4 style={{ fontSize: '16px' }}>ACC Guidelines</h4>
-					</button>
-				</div>
-				<div className="col-md-2 pt-2" style={{ textAlign: 'center' }}>
-					<button
-						type="button"
-						onClick={goToMedstarGuidelines}
-						className="btn btn-link"
-						style={{ padding: 0 }}
-					>
-						<h4 style={{ fontSize: '16px' }}>MedStar Guidelines</h4>
+						<h4 style={{ fontSize: '16px' }}>ASCVD Calculator</h4>
 					</button>
 				</div>
 				{feedback ? (
@@ -348,7 +278,7 @@ export default function Estimator(props) {
 				) : null}
 				<div className="col-md-2 pt-2" style={{ textAlign: 'center' }}>
 					<h4 style={{ fontSize: '14px' }}>
-						Calculations are made based on ACC guidelines. Last updated on{' '}
+						MESA calculations for ages 45-85. Last updated on{' '}
 						{formatDate(gitLastUpdatedDate)}.
 					</h4>
 				</div>
