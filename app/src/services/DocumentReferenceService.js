@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { format } from 'date-fns';
 import { documentReferenceConfiguration } from '../config';
 
 export default class DocumentReferenceService {
@@ -52,7 +52,7 @@ export default class DocumentReferenceService {
 		`;
 		const subject = { reference: `Patient/${tokenResponse.patient}` };
 		const author = [{ reference: `Practitioner/${userId}` }];
-		const indexed = moment().format();
+		const indexed = format(new Date(), "yyyy-MM-dd'T'HH:mm:ssXXX");
 
 		return {
 			subject,

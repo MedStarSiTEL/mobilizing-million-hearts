@@ -3,8 +3,8 @@ export const scope = process.env.SCOPE;
 export const iss = process.env.ISS;
 export const redirectUri = process.env.REDIRECT_URI;
 
-export const bloodPressureCutoff = process.env.BLOODPRESSURE_CUTOFF || 5; // years
-export const cholesterolCutoff = process.env.CHOLESTEROL_CUTOFF || 5;
+export const bloodPressureCutoff = Number(process.env.BLOODPRESSURE_CUTOFF || 5); // years
+export const cholesterolCutoff = Number(process.env.CHOLESTEROL_CUTOFF || 5);
 
 export const accGuidelines = 'http://www.onlinejacc.org/sites/default/files/additional_assets/guidelines/Prevention-Guidelines-Made-Simple.pdf';
 export const medstarGuidelines = '/MedStarGuidelines.pdf';

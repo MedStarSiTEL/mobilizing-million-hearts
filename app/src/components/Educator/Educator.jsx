@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import moment from 'moment';
+import { differenceInMilliseconds } from 'date-fns';
 import {
 	AFRICAN_AMERICAN,
 	FEMALE,
@@ -188,11 +188,11 @@ export default class Educator extends Component {
 		let res;
 		if (doubleFires[path]) {
 			const last = doubleFires[path];
-			const now = moment(new Date());
-			const duration = moment.duration(now.diff(last));
-			res = duration.asMilliseconds() < 65;
+			const now = new Date();
+			const diff = differenceInMilliseconds(now, last);
+			res = diff < 65;
 		}
-		this.setState({ doubleFires: { ...doubleFires, [path]: moment(new Date()) } });
+		this.setState({ doubleFires: { ...doubleFires, [path]: new Date() } });
 		return res;
 	}
 

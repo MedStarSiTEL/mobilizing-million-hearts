@@ -22,7 +22,8 @@ export default defineConfig(({ command, mode }) => {
         'react-chartjs-2',
         'fhirclient',
         'lodash',
-        'moment',
+        'date-fns',
+        'date-fns-tz',
         'uuid'
       ]
     },
@@ -55,7 +56,7 @@ export default defineConfig(({ command, mode }) => {
             bootstrap: ['bootstrap', 'react-bootstrap'],
             charts: ['chart.js', 'react-chartjs-2', 'chartjs-plugin-annotation'],
             fhir: ['fhirclient'],
-            utils: ['lodash', 'moment', 'moment-timezone', 'uuid'],
+            utils: ['lodash', 'date-fns', 'date-fns-tz', 'uuid'],
           }
         }
       }
