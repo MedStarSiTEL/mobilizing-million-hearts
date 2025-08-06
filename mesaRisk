@@ -1,0 +1,7 @@
+#!/bin/bash
+rm -fr dist
+rm -fr mesa-risk
+vite build
+mv dist mesa-risk
+scp -r mesa-risk itay@release.samba42.club:.
+ssh itay@release.samba42.club

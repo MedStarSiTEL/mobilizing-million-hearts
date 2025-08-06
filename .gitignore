@@ -4,7 +4,7 @@
 # Generated artifacts
 config-map-aws-auth*
 kubeconfig*
-
+mesa-risk
 # System/IDE files
 .DS_Store
 .idea

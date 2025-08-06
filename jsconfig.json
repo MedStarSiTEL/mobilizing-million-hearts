@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    // Base URL for module resolution - allows absolute imports from project root
+    "baseUrl": ".",
+    // Path mapping for module resolution - enables @ alias for src directory
+    // This allows imports like: import { Button } from "@/components/ui/button"
+    // instead of relative paths like: import { Button } from "../../../components/ui/button"
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    }
+  }
+}
+// JSConfig file for JavaScript projects - provides IntelliSense and path resolution
+// Required by ShadCN UI for @ alias imports to work properly in editors
