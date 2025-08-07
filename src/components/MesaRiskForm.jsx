@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -166,20 +167,22 @@ export default function MesaRiskForm({
                       <Badge variant="outline" className="rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs">5</Badge>
                       Diabetes
                     </Label>
-                    <RadioGroup 
-                      value={formData.diabetes} 
-                      onValueChange={(value) => updateFormData({diabetes: value})}
-                      className="flex gap-8"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="yes" id="diabetes-yes" />
-                        <Label htmlFor="diabetes-yes" className="font-normal cursor-pointer">Yes</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="diabetes-no" />
-                        <Label htmlFor="diabetes-no" className="font-normal cursor-pointer">No</Label>
-                      </div>
-                    </RadioGroup>
+                    <ToggleGroup className="justify-start w-fit">
+                      <ToggleGroupItem 
+                        value="yes" 
+                        selected={formData.diabetes === "yes"}
+                        onSelect={(value) => updateFormData({diabetes: value})}
+                      >
+                        Yes
+                      </ToggleGroupItem>
+                      <ToggleGroupItem 
+                        value="no" 
+                        selected={formData.diabetes === "no"}
+                        onSelect={(value) => updateFormData({diabetes: value})}
+                      >
+                        No
+                      </ToggleGroupItem>
+                    </ToggleGroup>
                   </div>
 
                   {/* Currently Smoke */}
@@ -188,20 +191,22 @@ export default function MesaRiskForm({
                       <Badge variant="outline" className="rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs">6</Badge>
                       Currently Smoke
                     </Label>
-                    <RadioGroup 
-                      value={formData.smoking} 
-                      onValueChange={(value) => updateFormData({smoking: value})}
-                      className="flex gap-8"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="yes" id="smoking-yes" />
-                        <Label htmlFor="smoking-yes" className="font-normal cursor-pointer">Yes</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="smoking-no" />
-                        <Label htmlFor="smoking-no" className="font-normal cursor-pointer">No</Label>
-                      </div>
-                    </RadioGroup>
+                    <ToggleGroup className="justify-start w-fit">
+                      <ToggleGroupItem 
+                        value="yes" 
+                        selected={formData.smoking === "yes"}
+                        onSelect={(value) => updateFormData({smoking: value})}
+                      >
+                        Yes
+                      </ToggleGroupItem>
+                      <ToggleGroupItem 
+                        value="no" 
+                        selected={formData.smoking === "no"}
+                        onSelect={(value) => updateFormData({smoking: value})}
+                      >
+                        No
+                      </ToggleGroupItem>
+                    </ToggleGroup>
                   </div>
 
                   {/* Family History */}
@@ -215,20 +220,22 @@ export default function MesaRiskForm({
                         History in parents, siblings, or children
                       </p>
                     </div>
-                    <RadioGroup 
-                      value={formData.familyHistory} 
-                      onValueChange={(value) => updateFormData({familyHistory: value})}
-                      className="flex gap-8 ml-8"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="yes" id="family-yes" />
-                        <Label htmlFor="family-yes" className="font-normal cursor-pointer">Yes</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="family-no" />
-                        <Label htmlFor="family-no" className="font-normal cursor-pointer">No</Label>
-                      </div>
-                    </RadioGroup>
+                    <ToggleGroup className="justify-start w-fit ml-8">
+                      <ToggleGroupItem 
+                        value="yes" 
+                        selected={formData.familyHistory === "yes"}
+                        onSelect={(value) => updateFormData({familyHistory: value})}
+                      >
+                        Yes
+                      </ToggleGroupItem>
+                      <ToggleGroupItem 
+                        value="no" 
+                        selected={formData.familyHistory === "no"}
+                        onSelect={(value) => updateFormData({familyHistory: value})}
+                      >
+                        No
+                      </ToggleGroupItem>
+                    </ToggleGroup>
                   </div>
                 </div>
 
@@ -413,20 +420,22 @@ export default function MesaRiskForm({
                       <Badge variant="outline" className="rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs">11</Badge>
                       Lipid Lowering Medication
                     </Label>
-                    <RadioGroup 
-                      value={formData.lipidMedication} 
-                      onValueChange={(value) => updateFormData({lipidMedication: value})}
-                      className="flex gap-8"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="yes" id="lipid-yes" />
-                        <Label htmlFor="lipid-yes" className="font-normal cursor-pointer">Yes</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="lipid-no" />
-                        <Label htmlFor="lipid-no" className="font-normal cursor-pointer">No</Label>
-                      </div>
-                    </RadioGroup>
+                    <ToggleGroup className="justify-start w-fit">
+                      <ToggleGroupItem 
+                        value="yes" 
+                        selected={formData.lipidMedication === "yes"}
+                        onSelect={(value) => updateFormData({lipidMedication: value})}
+                      >
+                        Yes
+                      </ToggleGroupItem>
+                      <ToggleGroupItem 
+                        value="no" 
+                        selected={formData.lipidMedication === "no"}
+                        onSelect={(value) => updateFormData({lipidMedication: value})}
+                      >
+                        No
+                      </ToggleGroupItem>
+                    </ToggleGroup>
                   </div>
 
                   {/* Hypertension Medication */}
@@ -435,20 +444,22 @@ export default function MesaRiskForm({
                       <Badge variant="outline" className="rounded-full w-6 h-6 p-0 flex items-center justify-center text-xs">12</Badge>
                       Hypertension Medication
                     </Label>
-                    <RadioGroup 
-                      value={formData.hypertensionMedication} 
-                      onValueChange={(value) => updateFormData({hypertensionMedication: value})}
-                      className="flex gap-8"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="yes" id="hypertension-yes" />
-                        <Label htmlFor="hypertension-yes" className="font-normal cursor-pointer">Yes</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="hypertension-no" />
-                        <Label htmlFor="hypertension-no" className="font-normal cursor-pointer">No</Label>
-                      </div>
-                    </RadioGroup>
+                    <ToggleGroup className="justify-start w-fit">
+                      <ToggleGroupItem 
+                        value="yes" 
+                        selected={formData.hypertensionMedication === "yes"}
+                        onSelect={(value) => updateFormData({hypertensionMedication: value})}
+                      >
+                        Yes
+                      </ToggleGroupItem>
+                      <ToggleGroupItem 
+                        value="no" 
+                        selected={formData.hypertensionMedication === "no"}
+                        onSelect={(value) => updateFormData({hypertensionMedication: value})}
+                      >
+                        No
+                      </ToggleGroupItem>
+                    </ToggleGroup>
                   </div>
                 </div>
 
