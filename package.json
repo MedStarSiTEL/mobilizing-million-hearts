@@ -1,6 +1,6 @@
 {
-  "name": "genndy-mode",
-  "description": "Development Authenticator module",
+  "name": "mesa-risk",
+  "description": "MESA Risk Calculator",
   "private": true,
   "version": "1.0.0",
   "type": "module",

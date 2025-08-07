@@ -12,14 +12,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Architecture
 
-This is a React-based development authentication module called "genndy-mode" that serves as a developer-only authentication bypass system to avoid installing OPAL locally.
+This is a React-based MESA risk calculator application called "mesa-risk".
 
 ### Core Architecture
 
 - **Frontend Framework**: React 19 with Vite build tool
 - **UI Components**: ShadCN UI with "New York" style and neutral color theme
 - **Styling**: Tailwind CSS 4.0 with custom `furia.css` (includes ShadCN theme variables)
-- **Base Path**: Application serves from `/genndy-mode` route
+- **Base Path**: Application serves from `/mesa-risk` route
 - **Port**: Development server runs on port 3001
 
 ### Key Services
@@ -45,13 +45,6 @@ This is a React-based development authentication module called "genndy-mode" tha
   - `VITE_APP_LOG_LEVEL` - Sets minimum log level (0-4)
   - `VITE_APP_AUTH_TOKEN_NAME` - Auth token identifier
 - Development environment file: `developer.env` with default settings
-
-### Development Users
-
-The system provides 3 test users (as noted in README):
-- Aku (admin)
-- Samurai Jack (regular user)  
-- The Scotsman (annoying user)
 
 ### ShadCN UI Integration
 
