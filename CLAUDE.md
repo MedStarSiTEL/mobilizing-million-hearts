@@ -10,6 +10,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run preview` - Preview production build
 - `npx shadcn@latest add [component]` - Add new ShadCN UI components
 
+## Testing Commands
+
+- `npm test` - Run tests in watch mode
+- `npm run test:run` - Run all tests once
+- `npm run test:ui` - Run tests with UI interface
+- `npm run test:watch` - Run tests in watch mode (alias for `npm test`)
+
 ## Project Architecture
 
 This is a React-based MESA risk calculator application called "mesa-risk".
@@ -62,3 +69,44 @@ This is a React-based MESA risk calculator application called "mesa-risk".
 - Tailwind configured for all JS/JSX/TS/TSX files in src/
 - ESLint setup with React hooks and refresh plugins
 - ShadCN components use Radix UI primitives with Tailwind styling
+
+## Query Parameter Support
+
+The MESA Risk Calculator supports URL query parameters to pre-populate form fields. This allows for bookmarking, sharing, and automated testing of specific scenarios.
+
+### Supported Parameters
+
+#### Demographics
+- `gender` or `sex` - Gender (`male`/`m` or `female`/`f`)
+- `age` - Age in years (45-85)
+- `race` or `ethnicity` - Race/ethnicity (`caucasian`/`white`/`1`, `chinese`/`2`, `african american`/`black`/`aa`/`3`, `hispanic`/`latino`/`4`)
+
+#### Medical History (Yes/No fields)
+- `diabetes` - Has diabetes (`yes`/`y`/`true`/`1` or `no`/`n`/`false`/`0`)
+- `smoking` or `smoke` - Currently smoking
+- `familyHistory`, `family`, or `fh` - Family history of heart attack
+
+#### Laboratory Values
+- `calcification`, `calc`, or `cac` - Coronary artery calcification score (0-2000)
+- `totalCholesterol`, `tchol`, or `tc` - Total cholesterol in mg/dL (100-400)
+- `hdlCholesterol` or `hdl` - HDL cholesterol in mg/dL (20-100)
+- `systolicBP`, `sbp`, or `bp` - Systolic blood pressure in mmHg (90-200)
+
+#### Medications (Yes/No fields)
+- `lipidMedication`, `lipid`, or `statin` - Taking lipid-lowering medication
+- `hypertensionMedication`, `htn`, or `bp` - Taking hypertension medication
+
+### Example URLs
+
+- Basic: `?age=57&sex=m`
+- Comprehensive: `?gender=male&age=70&calcification=500&race=caucasian&diabetes=yes&smoking=no&totalCholesterol=250&hdl=40&systolicBP=140`
+- Alternative names: `?sex=f&calc=200&fh=yes&statin=no&htn=yes`
+
+See `test-urls.md` for extensive examples.
+
+### Testing
+
+The query parameter functionality includes comprehensive tests:
+- **Integration tests**: `src/test/queryParams-integration.test.jsx` - Tests overall functionality
+- **Test scenarios**: `test-urls.md` - Manual testing scenarios with sample URLs
+- Run tests with `npm run test:run`
