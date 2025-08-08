@@ -1,0 +1,2260 @@
+
+
+All created analytic variables have the letter “C” appended to the variable name in order to indicate that it is a created variable, rather than a variable that is directly obtained as part of the MESA exam.
+
+Personal Characteristics
+
+Age (truncated to the nearest whole number)
+
+AGE1C = trunc[(enrolldt1 – birthdt1)/365.25]
+
+Ten-year age groups
+
+AGECAT1C = 1	age = 45-54 years
+AGECAT1C = 2	age = 55-64 years
+AGECAT1C = 3	age = 65-74 years
+AGECAT1C = 4	age = 75 years or older
+
+Gender
+
+GENDER1C = 0	female
+GENDER1C = 1	male
+
+Site
+
+SITE1C = 3	WFU
+SITE1C = 4	Columbia
+SITE1C = 5	JHU
+SITE1C = 6	Minnesota
+SITE1C = 7	NWU
+SITE1C = 8	UCLA
+
+Time Between Exams, Days
+
+SPSS Syntax:
+COMPUTE e12dyc = DATEDIFF(visitdt2,visitDt1,"days") .
+EXECUTE .
+
+Exam Completion Status, Exam 4
+
+SPSS Syntax:
+NUMERIC ecomp4c (F8.0).
+EXECUTE.
+
+COMPUTE ecomp4c=1.
+EXECUTE.
+
+IF(SYSMIS(htcm4) and SYSMIS (wtlb4) and SYSMIS (sbp4c) and SYSMIS (dbp4c)) ecomp4c=2.
+EXECUTE.
+
+VARIABLE LABEL ecomp4c "Exam 4 Completion Status".
+VALUE LABELS ecomp4c 
+1 "1: Complete" 
+2 "2: Partially-Complete: Phone-Administered Questionnaire Only".
+EXECUTE.
+
+Most Current Consent for Main Studies DNA Usage	
+
+MsDNA12c=1	Consent for main study use of genetics explicitly given
+		if consent given at Exam 2 (tgenems2=1)
+		or no valid data at Exam 2 and consent at Exam 1 (tgenems1=1)
+MsDNA12c = 0	Consent for main study use of genetics not explicitly given
+		All other values.
+
+	-Note: participants with MsDNA12c=0 have had their genetic information removed from the Exam 1 main file.
+
+
+Most Current Consent for Secondary Studies DNA Usage
+
+SsDNA12c=1	Consent for secondary study use of genetics explicitly given
+		if consent given at Exam 2 (tgeness2=1)
+		or no valid data at Exam 2 and consent at Exam 1 (tgeness1=1)
+SsDNA12c = 0	Consent for secondary study use of genetics not explicitly given
+		All other values.
+
+	-Note: participants with SsDNA12c=0 have NOT had their genetic information removed from the Exam 1 main file.
+Anthropometry
+
+Body mass index [BMI; weight(kg)/height(m)2] by WHO categories; reference 1
+
+BMI1C = (wtlb1*0.4536) / ((htcm1/100)^2)
+
+Body mass index categories
+
+BMI1C < 25			BMICAT1C =1	Normal
+BMI1C >= 25 and BMI1C < 30 	BMICAT1C =2	Grade 1 Overweight
+BMI1C >= 30 and BMI1C < 40 	BMICAT1C =3	Grade 2 Overweight
+BMI1C >= 40 			BMICAT1C =4	Grade 3 Overweight
+
+Body surface area (BSA)
+
+BSA1C =  0.20247*((htcm1/100)^(0.725))*((wtlb1*0.4536)^(0.425)).
+
+(^ indicates the value of the exponent; e.g., the second term in the equation is height(m) to the 0.725 power):
+
+
+Personal History
+
+Cigarette smoking status 
+
+CIG1C = 0	Never 	if evsmk1 = 0
+CIG1C = 1	Former	if evsmk1 = 1 AND cursmk1 = 0
+CIG1C = 2	Current 	if cursmk1 = 1
+
+(“ever” is defined as >= 100 cigarettes in your lifetime; “current” is defined as smoking cigarettes within the past 30 days)
+
+Exam 1 Pack-years of cigarette smoking (packs per day * years)
+
+RECODE agequit1 (99 = SYSMIS).
+EXECUTE.
+
+RECODE cig1c (SYSMIS = -999).
+EXECUTE.
+
+IF (cig1c = 0) pkyrs1c = 0.
+IF (cig1c = 1 AND (SYSMIS( agequit1) OR SYSMIS(agesmk1)) & cigsday1 = 0) pkyrs1c = 0.
+IF (cig1c = 1) pkyrs1c = (agequit1 - agesmk1) * (cigsday1 / 20).
+IF (cig1c = 2) pkyrs1c = (age1c - agesmk1) * (cigsday1 / 20).
+EXECUTE.
+
+Exam 2 Pack-years of cigarette smoking (packs per day * years)
+
+NUMERIC e2 (F8.0). 
+COMPUTE e2=0.
+IF (e12dyc>0) e2=1. 
+EXECUTE.
+
+RECODE cig2c (SYSMIS=-999).
+EXECUTE.
+
+IF (sysmis(cigsday2)) cigsday2 = cigsday1. 
+EXECUTE.
+
+IF (e1=1 and e2=1) pkyrs2c = pkyrs1c.
+EXECUTE.
+
+* Comment: Current smoker, non-missing cigs per day.
+IF (e12dyc > 0 and cig2c=2 and cigsday2 > 0) pkyrs2c = pkyrs2c + (cigsday2 / 20) * (e12dyc / 365.25).
+EXECUTE.
+
+* Comment: Current smoker at exam 1 and now former gets midpoint.
+IF (e12dyc > 0 and cig2c=1 and cig1c=2 and cigsday1 > 0) pkyrs2c = pkyrs2c + ((cigsday1 / 20) * (e12dyc / 365.25) * 0.5).
+EXECUTE.
+
+* Comment: Truncate value to two decimal places.
+COMPUTE pkyrs2c = (TRUNC(pkyrs2c * 100)) / 100.
+EXECUTE.
+
+* Comment: Set missing exams to missing.
+IF (e2=0) pkyrs2c = -999.
+RECODE pkyrs2c (-999=SYSMIS).
+EXECUTE.
+
+Exam 3 Pack-years of cigarette smoking (packs per day * years)
+
+COMPUTE e1=1.
+COMPUTE e2=0.
+COMPUTE e3=0.
+EXECUTE.
+
+IF (e12dyc>0) e2=1.
+IF (e13dyc>0) e3=1.
+EXECUTE.
+
+RECODE cig1c (SYSMIS=-999).
+RECODE cig2c (SYSMIS=-999).
+RECODE cig3c (SYSMIS=-999).
+EXECUTE.
+
+COMPUTE e23dyc = e13dyc - e12dyc.
+EXECUTE.
+
+* Comment: If # cigs missing get data from previous exams. 
+IF (sysmis(cigsday3)) cigsday3=cigsday2. 
+EXECUTE.
+
+COMPUTE pkyrs3c=pkyrs2c.
+EXECUTE.
+
+IF (e3=1 AND e2=0) e23dyc=e13dyc.
+EXECUTE.
+
+* Comment: Current smoker.
+IF(e23dyc > 0 and cig3c=2 and cigsday3 > 0) pkyrs3c = pkyrs3c + (cigsday3 / 20) * (e23dyc / 365.25).
+EXECUTE.
+
+* Comment: Former smoker, smoked at exam 2.
+IF(e23dyc > 0 and cig3c=1 and cig2c=2 and cigsday2 > 0) pkyrs3c=pkyrs3c + ((cigsday2 / 20) * (e23dyc / 365.25) * 0.5).
+EXECUTE.
+
+* Comment: Former smoker, smoked at exam 1.
+IF (e23dyc > 0 and cig3c=1 and cig2c=-999 and cig1c=2 and cigsday1 > 0) pkyrs3c=pkyrs3c + ((cigsday1 / 20) * (e23dyc / 365.25) * 0.5).
+EXECUTE.
+
+IF (e3=1 and e2=0 and e1=1) pkyrs3c=pkyrs1c.
+EXECUTE.
+Exam 3 Pack-years of cigarette smoking (packs per day * years) continued
+
+* Comment: Truncate value to two decimal places.
+COMPUTE pkyrs3c = (TRUNC(pkyrs3c * 100)) / 100.
+EXECUTE.
+
+* Comment: Set missing exams to missing.
+IF(e3=0) pkyrs3c=-999.
+RECODE pkyrs3c (-999=SYSMIS).
+EXECUTE.
+
+
+Exam 4 Pack-years of cigarette smoking (packs per day * years)
+
+* Comment: Compute Exam completion indicators.
+NUMERIC e1 (F8.0).
+NUMERIC e2 (F8.0).
+NUMERIC e3 (F8.0).
+NUMERIC e4 (F8.0).
+EXECUTE.
+
+COMPUTE e1=1.
+COMPUTE e2=0.
+COMPUTE e3=0.
+COMPUTE e4=0.
+EXECUTE.
+
+IF (e12dyc>0) e2=1.
+IF (e13dyc>0) e3=1.
+IF (e14dyc>0) e4=1.
+EXECUTE.
+
+RECODE cig4c (SYSMIS =-999).
+EXECUTE.
+
+* Comment: calculate days between combinations of exams.
+COMPUTE e23dyc = e13dyc - e12dyc.
+COMPUTE e34dyc = e14dyc - e13dyc.
+COMPUTE e45dyc = e15dyc - e14dyc.
+EXECUTE.
+
+* Comment: If # cigs missing get data from previous exams. 
+IF (SYSMIS (cigsday4)) cigsday4=cigsday3. 
+EXECUTE.
+
+Exam 4 Pack-years of cigarette smoking (packs per day * years) continued
+
+COMPUTE pkyrs5c=pkyrs4c.
+EXECUTE.
+
+* Comment: Current smoker.
+IF (e45dyc>0 AND cig5c=2 and cigsday5 > 0) pkyrs5c=pkyrs5c + (cigsday5 / 20) * (e45dyc / 365.25).
+EXECUTE.
+
+* Comment: Former smoker, smoked at exam 4.
+IF (e45dyc>0 AND cig5c=1 AND cig4c=2 and cigsday4 > 0) pkyrs5c=pkyrs5c + (cigsday4 / 20) * (e45dyc / 365.25) * 0.5.
+EXECUTE.
+
+* Comment: Former smoker, smoked at exam 3.
+IF (e45dyc>0 AND cig5c=1 AND cig4c=-999 AND cig3c=2 and cigsday3 > 0) pkyrs5c=pkyrs5c + (cigsday3 / 20) * (e45dyc / 365.25) * 0.5.
+EXECUTE.
+
+* Comment: Former smoker, smoked at exam 2.
+IF (e45dyc>0 AND cig5c=1 AND cig4c=-999 AND cig3c=-999 AND cig2c=2 and cigsday2 > 0) pkyrs5c=pkyrs5c + (cigsday2 / 20) * (e45dyc / 365.25) * 0.5.
+EXECUTE.
+
+* Comment: Former smoker, smoked at exam 1.
+IF (e45dyc>0 AND cig5c=1 AND cig4c=-999 AND cig3c=-999 AND cig2c=-999 AND cig1c=2 and cigsday1 > 0) pkyrs5c=pkyrs5c + (cigsday1 / 20) * (e45dyc / 365.25) * 0.5.
+EXECUTE.
+
+IF (e5=1 and e4=0 and e3=1) pkyrs5c=pkyrs3c.
+IF (e5=1 and e4=0 and e3=0 and e2=1) pkyrs5c=pkyrs2c.
+IF (e5=1 and e4=0 and e3=0 and e2=0 and e1=1) pkyrs5c=pkyrs1c.
+EXECUTE.
+
+* Comment: Truncate value to two decimal places.
+COMPUTE pkyrs4c = (TRUNC(pkyrs4c * 100)) / 100.
+EXECUTE.
+
+* Comment: Set missing exams to missing.
+IF(e4=0) pkyrs4c=-999.
+RECODE pkyrs4c (-999=SYSMIS).
+EXECUTE.
+
+
+Cigar smoking status  
+
+CGR1C = 0	Never 	if cigar1 = 0  or othtob1 = 0
+CGR1C = 1	Former 	if cigar1 = 1 AND cgrcur1 = 0
+CGR1C = 2	Current 	if cgrcur1 = 1
+ (ever is defined as >= 20 cigars in your lifetime; current is defined as smoking cigars within the past 30 days)
+
+Cigar smoking amount  (cigars per day * years)
+
+CGRYRS1C = 0 					if cgr1c = 0
+CGRYRS1C = (cgrageq1 - cgrage1) * cgrday1 		if cgr1c = 1
+CGRYRS1C = (age - cgrage1) * cgrday1 		if cgr1c = 2
+
+Pipe smoking status 
+
+PIP1C = 0	Never 		if pipe1 = 0 or othtob1=0
+PIP1C = 1	Former		if pipe1 = 1 AND pipcur1 = 0
+PIP1C = 2	Current		if pipcur1 = 1
+(ever is defined as >= 20 pipefuls in your lifetime; current is defined as smoking a pipe within the past 30 days)
+
+Pipe smoking amount  (pipefuls per day * years)
+
+PIPYRS1C = 0 				if pip1c = 0 
+PIPYRS1C = (pipageq1 - pipage1) * pipday1 	if pip1c = 1
+PIPYRS1C = (age - pipage1) * pipday1 		if pip1c = 2
+
+Chewing tobacco use 
+
+CHEW1C = 0	Never 	if chew1 = 0 or othtob1=0
+CHEW1C = 1	Former 	if chew1 = 1 AND chwcur1 = 0
+CHEW1C = 2	Current 	if chwcur1 = 1
+(ever is defined as using chewing tobacco >= 20 times in your lifetime; current is defined as using chewing tobacco within the past 30 days)
+
+Chewing tobacco amount  (# of times chewing tobacco is used per day * years)
+
+CHWYRS1C = 0 					if chew1 = 0
+CHWYRS1C = (chwageq1 - chwage1) * chwday1 	if chew1 = 1
+CHWYRS1C = (age - chwage1) * chwday1 		if chew1 = 2
+
+Snuff use 
+
+SNF1C = 0	Never 	if snuff1 = 0 or othtob1=0
+SNF1C = 1	Former 	if snuff1 = 1 AND snfcur1 = 0
+SNF1C = 2	Current 	if snfcur1 = 1
+
+(ever is defined as using snuff >= 20 times in your lifetime; current is defined as using snuff within the past 30 days)
+
+Snuff amount  (# of times snuff is used per day * years)
+
+SNFYRS1C = 0 					if snf1c = 0  		
+SNFYRS1C = (snfageq1 - snfage1) / snfday1 		if snf1c = 1
+SNFYRS1C = (age - snfage1) / snfday1 			if snf1c = 2
+
+Alcohol use
+
+ALC1C = 0	Never 	if alcohol1 = 0
+ALC1C = 1	Former 	if alcohol1 = 1 AND curalc1 = 0
+ALC1C = 2	Current 	if curalc1 = 1
+
+Years of alcohol use
+
+YRSALC1C = yrsalcp1		if alc1c=1
+YRSALC1C = yrsalcc1		if alc1c=2
+
+Alcohol use, number of drinks per week when drinking
+
+ALCWK1C = alcwkp1		if alc1c=1
+ALCWK1C = alcwkc1		if alc1c=2
+
+Family history of heart attack in parents, siblings, or children
+
+FHHA1C = 0	pmi1 = 0 and shrtatt1 = (0 or 8) and chrtatt1 = (0 or 8)
+FHHA1C = 1	pmi1 = 1 or shrtatt1 = 1 or chrtatt1 = 1
+
+Current aspirin use (taking aspirin at least 3 days per week at baseline)
+
+asacat1c = 0	Not taking aspirin
+ASaCAT1C = 1	If asa1c = 1 and aspdays1 >=3
+
+Region of Birth, US (Self)
+
+SPSS Syntax:
+RECODE stbth1
+('AK'=1) ('AL'=3) ('AR'=3) ('AZ'=1) ('CA'=1) ('CO'=1) ('CT'=4) ('DE'=3) ('DC'=3) ('FL'=3) ('GA'=3) ('HI'=1) ('IA'=2) ('ID'=1) ('IL'=2) ('IN'=2) ('KS'=2) ('KY'=3) ('LA'=3) ('MA'=4) ('MC'=3) ('MD'=3) ('ME'=4) ('MI'=2) ('MN'=2) ('MO'=2) ('MS'=3) ('MT'=1) ('NC'=3) ('ND'=2) ('NE'=2) ('NH'=4) ('NJ'=4) ('NM'=1) ('NV'=1) ('NY'=4) ('OH'=2) ('OK'=3) ('OR'=1) ('PA'=4) ('RI'=4) ('SC'=3) ('SD'=2) ('TN'=3) ('TX'=3) ('US'=SYSMIS) ('UT'=1) ('VA'=3) ('WA'=1) ('WI'=2) ('WM'=3) ('WV'=3) ('WW'=SYSMIS) ('WY'=1) ('VT'=4) (ELSE=SYSMIS) 
+INTO rgnbth1c.
+
+VARIABLE LABELS rgnbth1c 'Region of Birth in US - SELF'.
+EXECUTE .
+
+VALUE LABELS  rgnbth1c
+     1  'West'
+     2  'Midwest'
+     3  'South'
+     4  'Northeast'  .
+EXECUTE. 
+Region of Birth, US (Mother)
+
+SPSS Syntax:
+RECODE mbth1
+('AK'=1) ('AL'=3) ('AR'=3) ('AZ'=1) ('CA'=1) ('CO'=1) ('CT'=4) ('DE'=3) ('DC'=3) ('FL'=3) ('GA'=3) ('HI'=1) ('IA'=2) ('ID'=1) ('IL'=2) ('IN'=2) ('KS'=2) ('KY'=3) ('LA'=3) ('MA'=4) ('MC'=3) ('MD'=3) ('ME'=4) ('MI'=2) ('MN'=2) ('MO'=2) ('MS'=3) ('MT'=1) ('NC'=3) ('ND'=2) ('NE'=2) ('NH'=4) ('NJ'=4) ('NM'=1) ('NV'=1) ('NY'=4) ('OH'=2) ('OK'=3) ('OR'=1) ('PA'=4) ('RI'=4) ('SC'=3) ('SD'=2) ('TN'=3) ('TX'=3) ('US'=SYSMIS) ('UT'=1) ('VA'=3) ('WA'=1) ('WI'=2) ('WM'=3) ('WV'=3) ('WW'=SYSMIS) ('WY'=1) ('VT'=4) (ELSE=SYSMIS) 
+INTO mrgbth1c.
+
+VARIABLE LABELS mrgbth1c 'Region of Birth in US – Mother’.
+EXECUTE .
+
+VALUE LABELS  mrgbth1c
+     1  'West'
+     2  'Midwest'
+     3  'South'
+     4  'Northeast'  .
+EXECUTE. 
+
+Region of Birth, US (Father)
+
+SPSS Syntax:
+RECODE fbth1
+('AK'=1) ('AL'=3) ('AR'=3) ('AZ'=1) ('CA'=1) ('CO'=1) ('CT'=4) ('DE'=3) ('DC'=3) ('FL'=3) ('GA'=3) ('HI'=1) ('IA'=2) ('ID'=1) ('IL'=2) ('IN'=2) ('KS'=2) ('KY'=3) ('LA'=3) ('MA'=4) ('MC'=3) ('MD'=3) ('ME'=4) ('MI'=2) ('MN'=2) ('MO'=2) ('MS'=3) ('MT'=1) ('NC'=3) ('ND'=2) ('NE'=2) ('NH'=4) ('NJ'=4) ('NM'=1) ('NV'=1) ('NY'=4) ('OH'=2) ('OK'=3) ('OR'=1) ('PA'=4) ('RI'=4) ('SC'=3) ('SD'=2) ('TN'=3) ('TX'=3) ('US'=SYSMIS) ('UT'=1) ('VA'=3) ('WA'=1) ('WI'=2) ('WM'=3) ('WV'=3) ('WW'=SYSMIS) ('WY'=1) ('VT'=4) (ELSE=SYSMIS) 
+INTO frgbth1c.
+
+VARIABLE LABELS frgbth1c 'Region of Birth in US – Father’.
+EXECUTE .
+
+VALUE LABELS  frgbth1c
+     1  'West'
+     2  'Midwest'
+     3  'South'
+     4  'Northeast'  .
+EXECUTE. 
+Resting / Seated Blood Pressure
+
+Systolic blood pressure, average of 2nd and 3rd Dinamap measurements, in mm Hg
+
+SBP1C = average (s2bp1, s3bp1)
+
+Diastolic blood pressure, average of 2nd and 3rd Dinamap measurements, in mm Hg
+
+DBP1C = average (d2bp1, d3bp1)
+
+Seated Pulse Pressure
+
+NUMERIC spp1c (f8.1).
+EXECUTE.
+
+COMPUTE spp1c = sbp1c – dbp1c.
+EXECUTE.
+
+VARIABLE LABELS spp1c "SEATED PULSE PRESSURE (mmHg)".
+EXECUTE.
+
+Heart Rate, mean of 2nd and 3rd Seated BP readings
+
+COMPUTE hrdina2c = mean(hr2dina2, hr3dina2) .
+EXECUTE.
+
+VARIABLE LABELS hrdina2c 'Heart Rate, Seated BP, mean of 2nd and 3rd readings'.
+EXECUTE.
+
+WHO ROSE Intermittent Claudication
+
+COMPUTE whoros1c = 0.
+EXECUTE.
+
+IF (lpcalf1=1 & lpuphl1=1 & lprest1=0 & lpstop1=1 & lprelv1=1 & lpdis1=0) whoros1c=1.
+EXECUTE.
+
+DO IF (MISSING (lpcalf1 + lpuphl1 + lprest1 + lpstop1 + lprelv1 + lpdis1)).
+RECODE whoros1c (ELSE=SYSMIS).
+END IF.
+EXECUTE.
+
+DO IF (legpain1=0).
+RECODE whoros1c (ELSE=0).
+END IF.
+EXECUTE.
+
+Prevalent Disease Measures
+
+Hypertension stage by JNC VI (1997) criteria; reference 2
+
+HTNSTG1C = 6	Stage 3 hypertension if sbp1c >= 180 or dbp1c >= 110
+HTNSTG1C = 5	Stage 2 hypertension if (sbp1c = 160 - 179) or (dbp1c = 100 - 109)
+HTNSTG1C = 4	Stage 1 hypertension if (sbp1c = 140 - 159) or (dbp1c = 90 - 99)
+HTNSTG1C = 3	High-normal BP if (sbp1c = 130 - 139) or (dbp1c = 85 - 89)
+HTNSTG1C = 2	Normal BP if (sbp1c = 120 - 129) or (dbp1c =80 - 84)
+HTNSTG1C = 1	Optimal BP if sbp1c < 120 and dbp1c < 80
+
+If sbp1c and dbp1c are in different categories, use the higher category.
+
+Subtypes of hypertension
+
+HTNTYP1C  	Removed from the dataset as of 17 August 2006.
+
+Hypertension by JNC VI (1997) criteria	(note: because of the way this vble is defined, there are people who are not classified as hypertensives because of their lack of self report (highbp=0) .)
+
+HTN1C = 1	hypertension if dbp1c>=90 or sbp1c>=140 or (highbp1=1 and htnmed1c=1).  (highbp1 is self reported history of hypertension and htnmed1c is an indicator of any hypertensive meds).
+htn1c = 0	no hypertension if dbp1c<90 and sbp1c<140 and HTN1C not equal to 1 (above).
+
+Ankle-brachial index = minimum ratio of ankle BP to brachial (arm) BP.  Ratios are calculated separately for the left and right side, and the minimum is then selected.
+
+ABI1C = min (rtabi , ltabi)
+	
+	where	rtabi = (max (rdpedis1, rptib1)) / (avg (rbrach1,lbrach1))
+		ltabi = (max (ldpedis1, lptib1)) / (avg (rbrach1,lbrach1))
+
+For rtabi and ltabi, if the two brachial (arm) BPs differ by 10 mmHg or more, use the higher arm pressure as the denominator.
+
+Diabetes mellitus by 1997 ADA fasting criteria
+
+	DM971C	  = 3	Treated diabetes defined as:
+					(i)   use of insulin or ohga on medication form, or
+					(ii)  self-report of insulin/ohga us on medical history form and 
+						on the phlebotomy form
+
+DM971C     = 2	Untreated diabetes if fasting glucose >= 126 mg/dL and DM971C not equal to 3 (above).
+DM971C     = 1	impaired fasting glucose if fasting glucose = 110-125 mg/dL and DM971C not equal to 3 (above).
+DM971C     = 0	normal if fasting glucose is < 110 mg/dL and DM971C not equal to 3 (above).
+
+Diabetes mellitus by 2003 ADA fasting criteria
+
+	DM031C	  = 3	Treated diabetes defined as:
+					(i)   use of insulin or ohga on medication form, or
+					(ii)  self-report of insulin/ohga us on medical history form and 
+						on the phlebotomy form
+
+DM031C     = 2	Untreated diabetes if fasting glucose >= 126 mg/dL and DM031C not equal to 3 (above).
+DM031C     = 1	impaired fasting glucose if fasting glucose = 100-125 mg/dL and DM031C not equal to 3 (above).
+DM031C     = 0	normal if fasting glucose is < 100 mg/dL and DM031C not equal to 3 (above).
+
+Diabetes Type
+
+SPSS Syntax: 
+NUMERIC dmtype1c (f8.0).
+EXECUTE.
+
+compute dmtype1c=999.
+execute.
+
+* Male participants with Treated Diabetes.
+IF(dm031c = 3 and (gender1=1 and dbage1<=29)) dmtype1c = 1.
+IF(dm031c = 3 and (gender1=1 and dbage1>=30)) dmtype1c = 2.
+IF(dm031c = 3 and (gender1=1 and sysmis(dbage1))) dmtype1c = 2.
+EXECUTE.
+
+* Female participants with Treated Diabetes.
+IF(dm031c = 3 and (gender1=0 and dbage1<=29 and dbpreg1=0)) dmtype1c = 1.
+IF(dm031c = 3 and (gender1=0 and dbage1<=29 and sysmis(dbpreg1))) dmtype1c = 1.
+IF(dm031c = 3 and (gender1=0 and dbage1<=29 and dbpreg1=1)) dmtype1c = 2.
+IF(dm031c = 3 and (gender1=0 and dbage1>=29 and dbpreg1=9)) dmtype1c = 2.
+IF(dm031c = 3 and (gender1=0 and dbage1>=30 and dbpreg1=0)) dmtype1c = 2.
+IF(dm031c = 3 and (gender1=0 and dbage1>=30 and dbpreg1=1)) dmtype1c = 2.
+IF(dm031c = 3 and (gender1=0 and dbage1>=30 and dbpreg1=9)) dmtype1c = 2.
+IF(dm031c = 3 and (gender1=0 and sysmis(dbage1) and dbpreg1=0)) dmtype1c = 2.
+IF(dm031c = 3 and (gender1=0 and dbage1>=30 and sysmis(dbpreg1))) dmtype1c = 2.
+IF(dm031c = 3 and (gender1=0 and sysmis(dbage1) and sysmis(dbpreg1))) dmtype1c = 2.
+EXECUTE.
+
+VARIABLE LABEL dmtype1c "Exam 1 Diabetes Type".
+EXECUTE.
+
+VALUE LABELS dmtype1c 1 "Type 1 Diabetes" 2 "Type 2 Diabetes".
+EXECUTE.
+
+Glucose Drift Investigation
+
+The MESA computed diabetes variable (dm031c) was recalculated based upon the newly calibrated glucose values.  A revised dataset was released in November 2007, utilizing the recalibrated fasting glucose values and diabetes variables.  In April 2007, it was discovered that this dataset used erroneous cutoff points for the diabetes variable dm031c, with values of 100 included as normal as opposed to impaired fasting glucose.  This resulted in the misclassification of ~95 individuals as normal instead of IFG.  New datasets for all 4 Exams were released 4/21/08 with the correct values.
+
+Following are tables and figures showing the breakdown of the original diabetes variable prior to calibration, with the erroneous calibration results, and the corrected version  of the data.  Investigators who downloaded datasets for use between November 2007 and April 2008 and used the diabetes variables should acquire these revised datasets.
+
+The 2003 ADA guidelines for Fasting Plasma Glucose (FPG) levels are as follows:
+FPG <100 mg/dl (5.6 mmol/l) = normal fasting glucose; 
+FPG 100–125 mg/dl (5.6–6.9 mmol/l) = IFG (impaired fasting glucose); 
+FPG 126 mg/dl (7.0 mmol/l) = provisional diagnosis of diabetes (the diagnosis must be confirmed, as described below).
+Source:	Diabetes Care 27:S5-S10, 2004
+		http://care.diabetesjournals.org/cgi/content/full/27/suppl_1/s5#T2
+
+Original diabetes results for subjects attending all 4 exams
+
+
+
+Original recalibration results (erroneous normal/IFG classification)
+
+
+
+
+Recalibration results for subjects attending all 4 exams—revised version 5/7/08
+
+
+
+Uncalibrated Fasting Glucose Classification
+
+
+Calibrated (Incorrect cutoff points used)
+
+
+Calibrated (Updated chart)
+
+
+Fasting Glucose by Exam 
+
+
+
+
+Fasting Glucose by Exam (updated)
+
+
+
+
+Exam 1 Glucose Calibration
+Linear Regression of Exam 1 Uncalibrated and Re-Assay determines Intercept and Slope values:
+Intercept: -4.770
+Slope: 0.979
+SPSS Syntax:
+COMPUTE glucos1c = -4.770 + (0.979 * glucos1u).
+COMPUTE glucos1c=RND(glucos1c).
+EXECUTE.
+
+Exam 2 Glucose Calibration
+Linear Regression of Exam 2 Uncalibrated and Re-Assay determines Intercept and Slope values:
+Intercept: -1.2613
+Slope: 0.9641
+SPSS Syntax:
+COMPUTE glucos2c = -1.261 + (0.964 * glucos2u).
+COMPUTE glucos2c=RND(glucos2c).
+EXECUTE.
+
+Exam 3 Glucose Calibration
+Linear Regression of Exam 3 Uncalibrated and Re-Assay determines Intercept and Slope values:
+Intercept: 1.003
+Slope: 0.963
+SPSS Syntax:
+COMPUTE glucos3c = 1.003 + (0.964 * glucos3u).
+COMPUTE glucos3c=RND(glucos3c).
+EXECUTE.
+
+Exam 4 Glucose Calibration
+Linear Regression of Exam 4 Uncalibrated and Re-Assay determines Intercept and Slope values:
+Intercept: -5.163
+Slope: 1.009
+SPSS Syntax:
+COMPUTE glucos4c = -5.163 + (1.009 * glucos4u).
+COMPUTE glucos4c=RND(glucos4c).
+EXECUTE.
+
+NOTE: Original Glucose values were computed to a whole number. Calibrated Fasting Glucose computed to 3 decimal places. Compute Fasting Glucose value to whole number. 
+
+
+Framingham risk, NCEP version
+fr_totc	As of 17 August 2006, this variable is not included in the Exam 1 main dataset.  This variable measures the points for calculating 10-year risk of developing hard CHD (MI and CHD death).  This measure relies upon age [age1c], total cholesterol [chol1], current smoking status [cig1c], hdl [hdl1], systolic blood pressure [sbp1c] and presence of hypertension medication [htnmed1c] for its calculations.  Men and women [gender1] are scored separately.  No adjustment has been made for participant use of lipid lowering medications at the time of blood draw.  This measure should not be used in analysis; use the Framingham 10-year risk of CHD instead.  To find the Framingham risk point score, sum the points from the tables below.  For example, a male, age 66, cholesterol 232, HDL 54, smoker, and systolic blood pressure of 132 without hypertension treatments will have a point score of 11+1+0+1+1=14.  
+
+A missing value sets this entire variable to be missing, unless the missing value would have no effect on the total points.  (missing htnmed1c when sbp1c is less than 120, for example)  This scoring algorithm is oriented towards cholesterol treatment decisions.  Since diabetes is considered a CHD risk-equivalent, diabetics are automatically recommended for treatment, and the risk scoring does not include diabetes as a factor. For this reason, the 10 year risk estimates do not apply to diabetics, and this variable is set to missing for anyone with glucose1 >=126 mg/dl or on diabetes treatment.  [dm031c=2 or 3]  The algorithm is also only applicable for ages<80, however, for ages 80-85 we assigned them a risk as though they were age 79.   
+NOTE: Tables and methods taken directly from NCEP summary, reference #4.
+
+Framingham Point Scores for Men
+
+
+
+
+
+
+
+
+
+
+Framingham Point Scores for Women
+
+
+
+
+
+
+
+
+
+
+Framingham 10-year risk of CHD, NCEP version
+frncep1c	Risk of developing hard CHD within 10 years, calculated from the NCEP Framingham risk point scores.  Men and women use different tables to find their values:
+
+
+From the previous example, the man with a point score of 14 has an estimated probability of 16% with regards to experiencing a CHD in 10 years.  The actual value of FrNCEP1c would be 0.16
+
+NOTE: Tables and methods taken directly from NCEP summary, reference #4.
+
+Framingham risk, JAMA version 
+frjama1c	Risk of developing hard CHD within 10 years, calculated from the JAMA Framingham risk survival model.  These scores were developed using Cox proportional hazards models, using a separate model for each gender.  The models are not recalibrated to the MESA data; the average values of the Framingham covariates are used and the published Framingham average incidence rates are used.  The variables used in calculating FR_JAMA1c are age1c, htnstg1c, chol1, hdl1, dm031c, glucose1, cig1c and gender1.  The algorithm is only applicable for ages<75, however, however for older participants we assigned them a risk as though they were age 74.  The survival model’s means and coefficients are provided from the JAMA Framingham Cox regression.  For the precise method used to calculate this variable, consult the Created Variables Code Repository.
+
+Framingham risk, Circulation version 
+frcirc1c	Estimated 10 year risk of all CHD events by Framingham equation published in Circulation in 1998 [7].  This algorithm is very similar to that used in FR_JAMA1c above, only predicting all CHD (MI, CHD death, angina) instead of hard CHD.   The same risk factors and modeling strategy are used for both.  The algorithm is only applicable for ages<75, however, however for older participants we assigned them a risk as though they were age 74.  For the precise method used to calculate this variable, consult the Created Variables Code Repository.
+
+
+NCEP Metabolic Syndrome
+
+	mtsy031c   	Must have 3 or more of the following risk factors
+
+Increase waist size
+[waistcm1] > 102 cm if [gender1] = 1 
+[waistcm1] > 88 cm if [gender1] = 0
+2.) Elevated Triglycerides
+[trig1] >= 150mg/dl
+3.) Low HDL cholesterol  
+[hdl1] < 40 mg/dl if [gender1] = 1
+[hdl1] < 50 mg/dl if gender1 = 0
+4.) Hypertension
+[dbp1c] >= 85 or [sbp1c] >= 130 or [htnmed1c] = 1
+5.) Fasting glucose >=100 mg/dL *
+ [dm031c] > 0
+Where:  0 = Normal
+1 = Impaired fasting glucose
+2 = Untreated diabetes
+3 = Treated diabetes
+
+*Fasting glucose criteria previously defined as >=110 mg/dL, but revised by American Diabetes Association in 2003.
+
+Metabolic Syndrome Reference: http://circ.ahajournals.org/cgi/content/full/109/3/433
+Framingham Global CVD Risk per Circulation 2008 Publication
+
+Reference for Framingham Global CVD Risk equation: 
+General cardiovascular risk profile for use in primary care: the Framingham Heart Study, Circulation 2008, volume 117 pages 743-753
+http://circ.ahajournals.org/content/117/6/743.full
+
+SPSS Syntax: 
+
+NUMERIC frci081c (F8.2).
+EXECUTE.
+
+VARIABLE LABELS frci081c "FRAMINGHAM GLOBAL CVD RISK PER CIRC 2008 PAPER".
+EXECUTE.
+
+FEMALES
+
+Compute temporary sbp1x variable that is a rounded whole number version of sbp1c (syntax below uses sbp1c whole number values as part of computation criteria.
+
+COMPUTE sbp1x=rnd(sbp1c).
+EXECUTE.
+
+COMPUTE f_points_age=0.
+IF(gender1=0 & age1c <= 39) f_points_age = 2.
+IF(gender1=0 & age1c >= 40 & age1c <= 44) f_points_age = 4.
+IF(gender1=0 & age1c >= 45 & age1c <= 49) f_points_age = 5.
+IF(gender1=0 & age1c >= 50 & age1c <= 54) f_points_age = 7.
+IF(gender1=0 & age1c >= 55 & age1c <= 59) f_points_age = 8.
+IF(gender1=0 & age1c >= 60 & age1c <= 64) f_points_age = 9.
+IF(gender1=0 & age1c >= 65 & age1c <= 69) f_points_age = 10.
+IF(gender1=0 & age1c >= 70 & age1c <= 74) f_points_age = 11.
+IF(gender1=0 & age1c >=75) f_points_age = 12.
+EXECUTE.
+
+COMPUTE f_points_hdl=0.
+IF(gender1=0 & hdl1 >= 60) f_points_hdl = -2.
+IF(gender1=0 & hdl1 >=50 & hdl1 <=59) f_points_hdl = -1.
+IF(gender1=0 & hdl1 >=45 & hdl1 <=49) f_points_hdl = 0.
+IF(gender1=0 & hdl1 >=35 & hdl1 <=44) f_points_hdl = 1.
+IF(gender1=0 & hdl1 <35) f_points_hdl = 2.
+EXECUTE.
+
+COMPUTE f_points_chol=0.
+IF(gender1=0 & chol1<160) f_points_chol =0.
+IF(gender1=0 & chol1>=160 & chol1<=199) f_points_chol =1.
+IF(gender1=0 & chol1>=200 & chol1<=239) f_points_chol =3. 
+IF(gender1=0 & chol1>=240 & chol1<=279) f_points_chol =4. 
+IF(gender1=0 & chol1>=280) f_points_chol =5.
+EXECUTE.
+
+Framingham Global CVD Risk per Circulation 2008 Publication
+
+SPSS Syntax: 
+
+FEMALES (continued)
+
+COMPUTE f_points_sbp_nt=0.
+IF(gender1=0 & htnmed1c=0 & sbp1x<120) f_points_sbp_nt =-3.
+IF(gender1=0 & htnmed1c=0 & sbp1x>=120 & sbp1x<=129) f_points_sbp_nt = 0.
+IF(gender1=0 & htnmed1c=0 & sbp1x>=130 & sbp1x<=139) f_points_sbp_nt = 1.
+IF(gender1=0 & htnmed1c=0 & sbp1x>=140 & sbp1x<=149) f_points_sbp_nt = 2.
+IF(gender1=0 & htnmed1c=0 & sbp1x>=150 & sbp1x<=159) f_points_sbp_nt = 4.
+IF(gender1=0 & htnmed1c=0 & sbp1x>=160) f_points_sbp_nt = 5.
+EXECUTE.
+
+COMPUTE f_points_sbp_t=0.
+IF(gender1=0 & htnmed1c=1 & sbp1x<120) f_points_sbp_t = -1.
+IF(gender1=0 & htnmed1c=1 & sbp1x>=120 & sbp1x<=129) f_points_sbp_t = 2.
+IF(gender1=0 & htnmed1c=1 & sbp1x>=130 & sbp1x<=139) f_points_sbp_t = 3.
+IF(gender1=0 & htnmed1c=1 & sbp1x>=140 & sbp1x<=149) f_points_sbp_t = 5.
+IF(gender1=0 & htnmed1c=1 & sbp1x>=150 & sbp1x<=159) f_points_sbp_t = 6.
+IF(gender1=0 & htnmed1c=1 & sbp1x>=160) f_points_sbp_t = 7.
+EXECUTE.
+
+COMPUTE f_smoker = 0. 
+IF(gender1=0 & cig1c=2) f_smoker = 3.
+EXECUTE.
+ 
+COMPUTE f_diabetic = 0. 
+IF(gender1=0 & (dm031c=2 | dm031c=3)) f_diabetic = 4.
+EXECUTE.
+
+* Framingham Global CVD Risk Variable: FEMALE TOTAL
+
+IF(gender1=0) fram_points = (f_points_age + f_points_hdl + f_points_chol + f_points_sbp_nt + f_points_sbp_t + f_smoker + f_diabetic).
+EXECUTE.
+Framingham Global CVD Risk per Circulation 2008 Publication
+
+SPSS Syntax: 
+
+FEMALES (continued)
+
+* Framingham Global CVD Risk Variable: FEMALE FINAL SCORE.
+
+* Replace points with percent risk (note, lowest values left out as 
+	none of the MESA patients have these)
+
+IF(fram_points=0 & gender1=0) frci081c = 1.2.
+IF(fram_points=1 & gender1=0) frci081c = 1.5.
+IF(fram_points=2 & gender1=0) frci081c = 1.7.
+IF(fram_points=3 & gender1=0) frci081c = 2.0.
+IF(fram_points=4 & gender1=0) frci081c = 2.4.
+IF(fram_points=5 & gender1=0) frci081c = 2.8.
+IF(fram_points=6 & gender1=0) frci081c = 3.3.
+IF(fram_points=7 & gender1=0) frci081c = 3.9.
+IF(fram_points=8 & gender1=0) frci081c = 4.5.
+IF(fram_points=9 & gender1=0) frci081c = 5.3.
+IF(fram_points=10 & gender1=0) frci081c = 6.3.
+IF(fram_points=11 & gender1=0) frci081c = 7.3.
+IF(fram_points=12 & gender1=0) frci081c = 8.6.
+IF(fram_points=13 & gender1=0) frci081c = 10.
+IF(fram_points=14 & gender1=0) frci081c = 11.7.
+IF(fram_points=15 & gender1=0) frci081c = 13.7.
+IF(fram_points=16 & gender1=0) frci081c = 15.9.
+IF(fram_points=17 & gender1=0) frci081c = 18.5.
+IF(fram_points=18 & gender1=0) frci081c = 21.5.
+IF(fram_points=19 & gender1=0) frci081c = 24.8.
+IF(fram_points=20 & gender1=0) frci081c = 28.5.
+IF(fram_points>=21 & gender1=0) frci081c = 30.
+EXECUTE.
+Framingham Global CVD Risk per Circulation 2008 Publication
+
+SPSS Syntax: 
+
+MALES 
+
+COMPUTE m_points_age=0.
+IF(gender1=1 & age1c <= 39) m_points_age = 2.
+IF(gender1=1 & age1c >= 40 & age1c <= 44) m_points_age = 5.
+IF(gender1=1 & age1c >= 45 & age1c <= 49) m_points_age = 6.
+IF(gender1=1 & age1c >= 50 & age1c <= 54) m_points_age = 8.
+IF(gender1=1 & age1c >= 55 & age1c <= 59) m_points_age = 10.
+IF(gender1=1 & age1c >= 60 & age1c <= 64) m_points_age = 11.
+IF(gender1=1 & age1c >= 65 & age1c <= 69) m_points_age = 12.
+IF(gender1=1 & age1c >= 70 & age1c <= 74) m_points_age = 14.
+IF(gender1=1 & age1c >=75) m_points_age = 15.
+EXECUTE.
+
+COMPUTE m_points_hdl=0.
+IF(gender1=1 & hdl1 >= 60) m_points_hdl = -2.
+IF(gender1=1 & hdl1 >=50 & hdl1 <=59) m_points_hdl = -1.
+IF(gender1=1 & hdl1 >=45 & hdl1 <=49) m_points_hdl = 0.
+IF(gender1=1 & hdl1 >=35 & hdl1 <=44) m_points_hdl = 1.
+IF(gender1=1 & hdl1 <35) m_points_hdl = 2.
+EXECUTE.
+
+COMPUTE m_points_chol=0.
+IF(gender1=1 & chol1<160) m_points_chol =0.
+IF(gender1=1 & chol1>=160 & chol1<=199) m_points_chol =1.
+IF(gender1=1 & chol1>=200 & chol1<=239) m_points_chol =2.
+IF(gender1=1 & chol1>=240 & chol1<=279) m_points_chol =3.
+IF(gender1=1 & chol1>=280) m_points_chol =4.
+EXECUTE.
+
+COMPUTE m_points_sbp_nt=0.
+IF(gender1=1 & htnmed1c=0 & sbp1x<120) m_points_sbp_nt =-2.
+IF(gender1=1 & htnmed1c=0 & sbp1x>=120 & sbp1x<=129) m_points_sbp_nt = 0.
+IF(gender1=1 & htnmed1c=0 & sbp1x>=130 & sbp1x<=139) m_points_sbp_nt = 1.
+IF(gender1=1 & htnmed1c=0 & sbp1x>=140 & sbp1x<=159) m_points_sbp_nt = 2.
+IF(gender1=1 & htnmed1c=0 & sbp1x>=160) m_points_sbp_nt = 3.
+EXECUTE.
+
+COMPUTE m_points_sbp_t=0.
+IF(gender1=1 & htnmed1c=1 & sbp1x<120) m_points_sbp_t = 0.
+IF(gender1=1 & htnmed1c=1 & sbp1x>=120 & sbp1x<=129) m_points_sbp_t = 2.
+IF(gender1=1 & htnmed1c=1 & sbp1x>=130 & sbp1x<=139) m_points_sbp_t = 3.
+IF(gender1=1 & htnmed1c=1 & sbp1x>=140 & sbp1x<=159) m_points_sbp_t = 4.
+IF(gender1=1 & htnmed1c=1 & sbp1x>=160) m_points_sbp_t = 5.
+Framingham Global CVD Risk per Circulation 2008 Publication
+
+SPSS Syntax: 
+
+MALES (continued) 
+
+COMPUTE m_smoker=0.
+IF(gender1=1 & cig1c=2) m_smoker = 4.
+EXECUTE.
+
+COMPUTE m_diabetic=0.
+IF(gender1=1 & (dm031c=2 | dm031c=3)) m_diabetic = 3.
+EXECUTE.
+
+* Framingham Global CVD Risk Variable: MALE TOTAL.
+
+IF(gender1=1) fram_points =(m_points_age + m_points_hdl + m_points_chol + m_points_sbp_nt + m_points_sbp_t + m_smoker + m_diabetic).
+EXECUTE.
+
+* Framingham Global CVD Risk Variable: MALE FINAL SCORE.
+
+* Replace points with percent risk (note, lowest values left out as 
+	none of the MESA patients have these)
+
+IF(fram_points=0 & gender1=1) frci081c = 1.6.
+IF(fram_points=1 & gender1=1) frci081c = 1.9.
+IF(fram_points=2 & gender1=1) frci081c = 2.3.
+IF(fram_points=3 & gender1=1) frci081c = 2.8.
+IF(fram_points=4 & gender1=1) frci081c = 3.3.
+IF(fram_points=5 & gender1=1) frci081c = 3.9.
+IF(fram_points=6 & gender1=1) frci081c = 4.7.
+IF(fram_points=7 & gender1=1) frci081c = 5.6.
+IF(fram_points=8 & gender1=1) frci081c = 6.7.
+IF(fram_points=9 & gender1=1) frci081c = 7.9.
+IF(fram_points=10 & gender1=1) frci081c = 9.4.
+IF(fram_points=11 & gender1=1) frci081c = 11.2.
+IF(fram_points=12 & gender1=1) frci081c = 13.2.
+IF(fram_points=13 & gender1=1) frci081c = 15.6.
+IF(fram_points=14 & gender1=1) frci081c = 18.4.
+IF(fram_points=15 & gender1=1) frci081c = 21.6.
+IF(fram_points=16 & gender1=1) frci081c = 25.3.
+IF(fram_points=17 & gender1=1) frci081c = 29.4.
+IF(fram_points>=18 & gender1=1) frci081c = 30.
+EXECUTE.
+Atherosclerotic Cardiovascular Disease (ASCVD) Risk Score (Goff et al., 2014)
+
+Stata Syntax: 
+
+*** 1A. Create the risk score variables
+
+* Age (logged)
+gen lnage = ln(age1c)
+	label variable lnage "ln(Age) in years [age1c]"	
+	
+* Smoker (current smoker)
+gen smoker = cig1c
+	recode smoker 0/1=0 2=1
+	label variable smoker "Smoker: 1=yes [cig1c]"
+	label define smoker 0 "(0) Never/Former" 1 "(1) Current"
+	label values smoker smoker
+	
+* Interaction: ln(Age) * ln(Age)
+gen lnageSQ = lnage * lnage
+	label variable lnageSQ "ln(age) squared"	
+	
+* Total cholesterol (logged) 
+gen lnchol = ln(chol1)
+	label variable lnchol "ln(Cholesterol) [chol1]"
+	
+* Interaction: ln(Age) * ln(totalchol)
+gen ageTC = lnage * lnchol
+	label variable ageTC "ln(age) * ln(totalchol)"
+	
+* HDL cholesterol (logged)
+gen lnhdl = ln(hdl1)
+	label variable lnhdl "ln(HDL Chol) [hdl1]"
+	
+* Interaction: ln(Age) * ln(hdlchol)
+gen ageHDL = lnage * lnhdl
+	label variable ageHDL "ln(age) * ln(hdl)"
+	
+* SBP (logged)
+gen lnSBP = ln(sbp1c) 
+	label variable lnSBP "ln(SBP) [sbp1c]"	
+	
+* Interaction: ln(Age) * ln(SBP)
+gen ageSBP = lnage * lnSBP
+	label variable ageSBP "ln(age) * ln(SBP)"
+	
+* Interaction: ln(Age) * smoker
+gen ageSMOKE = lnage * smoker
+	label variable ageSMOKE "ln(age) * smoker"
+Atherosclerotic Cardiovascular Disease (ASCVD) Risk Score (Goff et al., 2014) (continued)
+
+Stata Syntax (continued): 
+	
+* Diabetes (yes/no)
+/* Note: this may or may not be the definition of "diabetic" that
+	you want to use */
+gen diabetic = 0
+	replace diabetic = 1 if dm031c==3 | glucos1c>140
+	replace diabetic = . if dm031c==. & glucos1c==.
+	label variable diabetic "Diabetes: 1=yes [dm031c, glucos1c]"
+	label define diabetic 0 "(0) Not diabetic" 1 "(1) Diabetic"
+	label values diabetic diabetic
+	
+*** 1B. Do the calculation for each group	
+
+gen ascvdcalc = .
+	
+#delimit ;
+
+/* Model for non-Black women (if treated) */
+replace ascvdcalc = (-29.799*lnage) + /* Log of age */
+	(4.884*lnageSQ)   + /* Log of age - squared */
+	(13.540*lnchol)   + /* Log of total cholesterol */ 
+	(-3.114*ageTC)    + /* Log of age * Log of TC */
+	(-13.578*lnhdl)   + /* Log of HDL cholesterol */
+	(3.149*ageHDL)    + /* Log of age * Log of HDL */
+	(2.019*lnSBP)     + /* Log of SBP if treated */
+	(7.574*smoker)    + /* Smoking */
+	(-1.665*ageSMOKE) + /* LN(age) * smoking */
+	(.661*diabetic)     /* Diabetes */
+	if gender==0 & htnmed1c==1 & race1c~=3 ; 
+	
+/* Model for non-Black women (if UNtreated) */
+replace ascvdcalc = (-29.799*lnage) + /* Log of age */
+	(4.884*lnageSQ)   + /* Log of age - squared */
+	(13.540*lnchol)   + /* Log of total cholesterol */ 
+	(-3.114*ageTC)    + /* Log of age * Log of TC */
+	(-13.578*lnhdl)   + /* Log of HDL cholesterol */
+	(3.149*ageHDL)    + /* Log of age * Log of LDL */
+	(1.957*lnSBP)     + /* Log of SBP if NOT treated */	
+	(7.574*smoker)    + /* Smoking */
+	(-1.665*ageSMOKE) + /* LN(age) * smoking */
+	(.661*diabetic)     /* Diabetes */
+	if gender==0 & htnmed1c==0 & race1c~=3 ; 	
+Atherosclerotic Cardiovascular Disease (ASCVD) Risk Score (Goff et al., 2014) (continued)
+
+Stata Syntax (continued): 
+	
+/* Model for Black women (if treated) */
+replace ascvdcalc = (17.114*lnage) + /* Log of age */
+	(.940*lnchol)     + /* Log of total cholesterol */ 
+	(-18.920*lnhdl)   + /* Log of HDL cholesterol */
+	(4.475*ageHDL)    + /* Log of age * Log of HDL */
+	(29.291*lnSBP)    + /* Log of SBP if treated */
+	(-6.432*ageSBP)   + /* Log of age * Log of treated SBP */
+	(.691*smoker)     + /* Smoking */
+	(.874*diabetic)     /* Diabetes */
+	if gender==0 & htnmed1c==1 & race1c==3 ; 
+	
+/* Model for Black women (if UNtreated) */
+replace ascvdcalc = (17.114*lnage) + /* Log of age */
+	(.940*lnchol)     + /* Log of total cholesterol */ 
+	(-18.920*lnhdl)   + /* Log of HDL cholesterol */
+	(4.475*ageHDL)    + /* Log of age * Log of HDL */
+	(27.820*lnSBP)    + /* Log of SBP if not treated */
+	(-6.087*ageSBP)   + /* Log of age * Log of UNtreated SBP */
+	(.691*smoker)     + /* Smoking */
+	(.874*diabetic)     /* Diabetes */
+	if gender==0 & htnmed1c==0 & race1c==3 ; 
+	
+/* Model for non-Black men (if treated) */
+replace ascvdcalc = (12.344*lnage) + /* Log of age */
+	(11.853*lnchol)   + /* Log of total cholesterol */ 
+	(-2.664*ageTC)    + /* Log of age * Log of TC */
+	(-7.990*lnhdl)    + /* Log of HDL cholesterol */
+	(1.769*ageHDL)    + /* Log of age * Log of HDL */
+	(1.797*lnSBP)     + /* Log of SBP if treated */
+	(7.837*smoker)    + /* Smoking */
+	(-1.795*ageSMOKE) + /* LN(age) * smoking */
+	(.658*diabetic)     /* Diabetes */
+	if gender==1 & htnmed1c==1 & race1c~=3 ; 
+Atherosclerotic Cardiovascular Disease (ASCVD) Risk Score (Goff et al., 2014) (continued)
+
+Stata Syntax (continued): 
+	
+/* Model for non-Black men (if UNtreated) */
+replace ascvdcalc = (12.344*lnage) + /* Log of age */
+	(11.853*lnchol)   + /* Log of total cholesterol */ 
+	(-2.664*ageTC)    + /* Log of age * Log of TC */
+	(-7.990*lnhdl)    + /* Log of HDL cholesterol */
+	(1.769*ageHDL)    + /* Log of age * Log of HDL */
+	(1.764*lnSBP)     + /* Log of SBP if UNtreated */
+	(7.837*smoker)    + /* Smoking */
+	(-1.795*ageSMOKE) + /* LN(age) * smoking */
+	(.658*diabetic)     /* Diabetes */
+	if gender==1 & htnmed1c==0 & race1c~=3 ; 
+	
+/* Model for Black men (if treated) */
+replace ascvdcalc = (2.469*lnage) + /* Log of age */
+	(.302*lnchol)     + /* Log of total cholesterol */ 
+	(-.307*lnhdl)     + /* Log of HDL cholesterol */
+	(1.916*lnSBP)     + /* Log of SBP if treated */
+	(.549*smoker)     + /* Smoking */
+	(.645*diabetic)     /* Diabetes */
+	if gender==1 & htnmed1c==1 & race1c==3 ; 
+	
+/* Model for Black men (if NOT treated) */
+replace ascvdcalc = (2.469*lnage) + /* Log of age */
+	(.302*lnchol)     + /* Log of total cholesterol */ 
+	(-.307*lnhdl)     + /* Log of HDL cholesterol */
+	(1.809*lnSBP)     + /* Log of SBP if treated */
+	(.549*smoker)     + /* Smoking */
+	(.645*diabetic)     /* Diabetes */
+	if gender==1 & htnmed1c==0 & race1c==3 ; 
+	
+#delimit cr
+
+Atherosclerotic Cardiovascular Disease (ASCVD) Risk Score (Goff et al., 2014) (continued)
+
+Stata Syntax (continued): 
+	
+*** 1C. Calculate estimated 10-yr Lab-Based ACVD event rate
+
+gen ascvd = .
+	label variable ascvd "[ASCVD] Estimated 10-yr ACVD rate (Goff et al. 2013)"
+	/*Non-Black Women*/
+	replace ascvd = 1-(.9665)^(exp(ascvdcalc+29.18)) if gender==0 & race1c~=3 
+	/* Black women */
+	replace ascvd = 1-(.9533)^(exp(ascvdcalc-86.61)) if gender==0 & race1c==3 
+	/* Non-Black men */
+	replace ascvd = 1-(.9144)^(exp(ascvdcalc-61.18)) if gender==1 & race1c~=3 
+	/* Black men */
+	replace ascvd = 1-(.8954)^(exp(ascvdcalc-19.54)) if gender==1 & race1c==3 
+	drop ascvdcalc
+	rename ascvd ascvd1c
+
+
+MESA 10-year CHD Risk Score 
+
+Reference for MESA 10-year CHD Risk Score equation: 
+10-Year Coronary Heart Disease Risk Prediction Using Coronary Artery Calcium and Traditional Risk Factors: Derivation in the MESA (Multi-Ethnic Study of Atherosclerosis) With Validation in the HNR (Heinz Nixdorf Recall) Study and the DHS (Dallas Heart Study).
+J Am Coll Cardiol. 2015 Oct 13;66(15):1643-53.
+
+SPSS Syntax: 
+
+* Comment: Create Single Race/Ethnicity Indicator.
+
+NUMERIC chinese (F8.0).
+NUMERIC black (F8.0).
+NUMERIC hisp (F8.0).
+EXECUTE.
+
+COMPUTE chinese = 0.
+COMPUTE black = 0.
+COMPUTE hisp = 0.
+EXECUTE.
+
+IF(race1c=2) chinese = 1.
+IF(race1c=3) black = 1.
+IF(race1c=4) hisp = 1.
+EXECUTE.
+MESA 10-year CHD Risk Score (continued)
+
+SPSS Syntax (continued): 
+
+VARIABLE LABELS chinese "CHD Risk: Chinese Ethnicity".
+VARIABLE LABELS black "CHD Risk: Black Ethnicity".
+VARIABLE LABELS hisp "CHD Risk: Hispanic Ethnicity".
+EXECUTE.
+
+VALUE LABELS chinese 0 "No" 1 "Yes".
+VALUE LABELS black 0 "No" 1 "Yes".
+VALUE LABELS hisp 0 "No" 1 "Yes".
+EXECUTE.
+
+* Comment: Create Single Diabetes Indicator.
+
+IF(dm031c>=0) dm = 0.
+EXECUTE.
+
+IF(dm031c=2) dm = 1.
+IF(dm031c=3) dm = 1.
+EXECUTE.
+
+VARIABLE LABELS dm "CHD Risk: Diabetes Status".
+VALUE LABELS dm 0 "No" 1 "Yes".
+EXECUTE.
+
+* Comment: Create Single Smoking Status Indicator.
+
+IF(cig1c>=0) smoke = 0.
+EXECUTE.
+
+IF(cig1c=2) smoke = 1.
+EXECUTE.
+
+VARIABLE LABELS smoke "CHD Risk: Smoking Status".
+VALUE LABELS smoke 0 "No" 1 "Yes".
+EXECUTE.
+
+* Comment: Create Family Hx of Heart Attack Indicator.
+
+COMPUTE fhhx = 0.
+EXECUTE.
+
+IF(fhha1c=1) fhhx = 1.
+EXECUTE.
+MESA 10-year CHD Risk Score (continued)
+
+SPSS Syntax (continued): 
+
+VARIABLE LABELS fhhx "CHD Risk: Family Hx of Heart Attack".
+VALUE LABELS fhhx 0 "No" 1 "Yes".
+EXECUTE.
+
+* Comment: Create Natural Log of CAC score.
+
+COMPUTE lncac = LN(agatpm1c+1).
+EXECUTE.
+
+VARIABLE LABELS lncac "Natural Log of Variable [agatpm1c]".
+EXECUTE.
+
+* Comment: Create Exam 1 MESA 10-year CHD Risk Score with CAC.
+
+COMPUTE lest11 = (0.0172 * age1c)
+ + (.4079 * gender1)
+ + (-0.3475 * chinese)
+ + (0.0353 * black)
+ + (-0.0222 * hisp)
+ + (0.3892 * dm)
+ + (0.3717 * smoke)
+ + (0.0043 * chol1)
+ + (-0.0114 * hdl1)
+ + (0.1206 * lipid1c)
+ + (0.0066 * sbp1c)
+ + (0.2278 * htnmed1c)
+ + (0.3239 * fhhx)
+ + (0.2743 * lncac).
+EXECUTE.
+
+NUMERIC chdriskcac1c (F8.4).
+EXECUTE.
+
+COMPUTE chdriskcac1c = 1 - (0.99833**EXP(lest11)).
+EXECUTE.
+
+COMPUTE chdriskcac1c = 100 * chdriskcac1c.
+EXECUTE.
+
+VARIABLE LABELS lest11 "Exam 1 with CAC: Linear Estimate".
+VARIABLE LABELS chdriskcac1c "MESA 10-year CHD Risk Score including CAC".
+EXECUTE.
+MESA 10-year CHD Risk Score (continued)
+
+SPSS Syntax (continued): 
+
+* Comment: Create Exam 1 MESA 10-year CHD Risk Score without CAC.
+
+COMPUTE lest21 = (0.0455 * age1c)
++ (.7496 * gender1)
++ (-0.5055 * chinese)
++ (-0.2111 * black)
++ (-0.1900 * hisp)
++ (0.5168 * dm)
++ (0.4732 * smoke)
++ (0.0053 * chol1)
++ (-0.0140 * hdl1)
++ (0.2473 * lipid1c)
++ (0.0085 * sbp1c)
++ (0.3381 * htnmed1c)
++ (0.4522 * fhhx).
+EXECUTE.
+
+NUMERIC chdrisknocac1c (F8.4).
+EXECUTE.
+
+COMPUTE chdrisknocac1c = 1 - (0.99963**EXP(lest21)).
+EXECUTE.
+
+COMPUTE chdrisknocac1c = 100 * chdrisknocac1c.
+EXECUTE.
+
+VARIABLE LABELS lest21 "Exam 1 No CAC: Linear Estimate".
+VARIABLE LABELS chdrisknocac1c "MESA 10-year CHD Risk Score without CAC".
+EXECUTE.
+MESA Life’s Simple Seven / Cardiovascular Health Score 
+
+Purpose: Create Cardiovascular Health score for MESA Exam 1 and Exam 5.
+
+Summary Details: 
+Overall Score Ranges 0-14. 
+Overall score categories
+0-8: Low
+8-11: Moderate 
+12+: High
+7 components: smoking, BMI, physical activity, diet (5 parts), cholesterol, blood pressure, and fasting plasma glucose
+
+Final Variable: cvhscore
+Variables used to created final score: smokestat, bmigroup, cholgroup, bloodpres, fbg, diet, physact
+Dataset and variables created in SAS 9.4
+
+Outline of current document:
+Tables- components of the score; prevalence of factors/scores in MESA, Aric, and NHANES
+How score was coded
+
+Reference: 
+DM Lloyd-Jones et. al. , Defining and Setting National Goals for CVH Promotion and Disease Reduction: The AHA's Strategic Impact Goal Through 2020 and Beyond. Table 3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MESA Life’s Simple Seven / Cardiovascular Health Score (continued)
+
+Table 1. American Heart Association (AHA) Definitions of Poor, Intermediate, and Ideal Cardiovascular Health (CVH) for each metric
+
+
+
+
+Table 2. Dietary components of the AHA CVH Score
+
+
+
+
+MESA Life’s Simple Seven / Cardiovascular Health Score (continued)
+
+Table 3. Prevalence of Baseline Cardiovascular Health Risk Factors and Studies in MESA, ARIC, and the NHANES 2005-06 (used by AHA for guidelines).
+
+
+
+MESA Life’s Simple Seven / Cardiovascular Health Score (continued)
+
+OVERALL CARDIOVASCULAR HEALTH SCORE
+How it was coded:
+Using the seven components listed in Table 1, we summed the values assigned to each component. Scores ranged from 0-14. Participants who scored between 0-7 were considered to have poor cardiovascular health; scores between 8 and 11 were considered to be intermediate cardiovascular health; scores of 12 or greater was considered to be ideal cardiovascular health. The score was assigned to participants who had complete data on all seven components. 
+
+Components to in calculating the score:
+Smoking, BMI, Physical activity, Diet, Total Cholesterol, Blood Pressure, Fasting plasma glucose. The methods for calculating and coding each component is listed below. 
+
+
+Smoking
+MESA variables used: 
+cig1c, Cigarette smoking status
+agequit1, Cigarettes: Age quit smoking
+age1c, Age at Exam 1
+
+How it was coded: The variable “cig1c” contains cigarette smoking status, measured as, never, former, current. Current smokers were coded as poor for the CVH metric while never smokers were coded as ideal. Former smokers who quit smoking more than a year ago (calculated by subtracting agequit1 from age1c), were coded as ideal for the CVH metric, while former smoker who quit less than one year ago were coded intermediate. 
+
+BMI
+MESA variable used: 
+bmi1c, Body mass index [kg/m2]
+
+How it was coded: Participants with BMI  ≥ 30 kg/m2 was coded as poor for the CVH metric, BMI  ≥ 25 and < 30 kg/m2 was coded as intermediate, and BMI  < 25 kg/m2 was coded as ideal.
+
+Cholesterol
+MESA variables used: 
+chol1, Total cholesterol (mg/dL)
+lipid1c, Any lipid-lowering medication (medication inventory)
+
+How it was coded: 
+The variable “chol1” contained a measure of total cholesterol. Participants with cholesterol ≥ 240 mg/dL were coded as poor for the CVH metric; cholesterol ≤200 or >240 mg/dL was coded as intermediate. Participants whose cholesterol was < 200 mg/dL were coded as ideal, unless the participant was also taking lipid lowering medication, in which case they were coded as intermediate. 
+
+MESA Life’s Simple Seven / Cardiovascular Health Score (continued)
+
+Blood Pressure
+MESA variables used: 
+sbp1c, Seated systolic blood pressure (mmHg)
+dbp1c, Seated diastolic blood pressure (mmHg) 
+htnmed1c, Hypertension medication (medication inventory)
+
+How it was coded: 
+Participants with SBP ≥ 140 or DBP ≥ 90 were coded as poor for the CVH metric. SBP between < 140 and ≥ 120 or DBP between < 90 and  ≥ 80 were coded as intermediate. SBP < 120 and DBP < 80 was coded as ideal. If SBP < 120 and DBP < 80, and the participant was taking antihypertension medication, they were coded as intermediate. 
+
+Fasting Plasma Glucose
+MESA variables used: 
+glucos1c, Fasting glucose (mg/dL) calibrated
+dm031c, Exam 1 Diabetes Mellitus by 2003 ADA fasting criteria algorithm 
+
+How it was coded: 
+Participants with glucose ≥ 126 mg/dL were coded as poor for the CVH metric; glucose ≥ 100 and  < 236 mg/dL, was coded as intermediate. Glucose < 100 was coded as ideal, except for participants who were taking diabetes medication (dm031= 3, treated diabetes), who were coded as intermediate.
+
+Dietary Recommendations
+
+At the baseline examination, MESA participants filled out a modified-Block 120-item food frequency questionnaire (FFQ) that asked about average consumption of specific food items over the previous year. 
+
+How it was coded: 
+The diet metric is composed of five dietary factors: intake of fruits and vegetables, fish, sodium, sugar-sweetened beverages, and fiber-rich whole grains. Each dietary factor has a recommended intake (e.g., ≥ 4.5 cups of fruits and vegetables per day). Participants who met 0-1 of the criteria were coded as poor. Participants who met 2-3 of the criteria were coded as intermediate. Participants who met 4-5 of the criteria were coded as ideal. 
+MESA Life’s Simple Seven / Cardiovascular Health Score (continued)
+
+Individual Components
+
+Component 1: Fruits and Vegetables >= 4.5 cups per day
+
+MESA variables used:
+fgfruit1c, Food group: Fruit
+fgfruitjuice1c, Food group: Fruit Juice
+fglegumes1c, Food group: Legumes
+fgvgreenleafy1c, Food group: Green Leafy Vegetables
+fgvcrucifer1c, Food group: Cruciferous Vegetables
+fgvdyellow1c, Food group: Dark Yellow Vegetables
+fgvpotato1c, Food group: Potato (Vegetables)
+fgvother1c, Food group: Other Vegetables 
+fgavocado1c, Food group: Avocado
+fgtomato1c, Food group: Tomato
+fgfriedpotato1c Food group: Fried Potato
+
+How it was coded: 
+The fruit and vegetable food groups listed in the variables above are “calculated variables” in MESA that combined individual food items on the MESA FFQ. For example, the variable “fgfruit1c” was the sum of servings per day of fruits that were asked about separately (apples, bananas, oranges, dried fruits, and so forth). To convert servings per day into cups per day, the variables were divided by two (1 serving = ½ cup).If the total fruit/vegetable cups per day were ≥ 4.5, participants were coded as a Yes/Criteria met. If the total fruit/vegetable cups per day were < 4.5, participants were coded as No/Criteria not met. 
+
+Assumptions Made:
+The MESA FFQ did not allow us to calculate servings in exact cups per day for individual food items.  The American Heart Association classifies one serving of fruits/vegetables as 1 cup of raw leafy vegetables (about the size of a small fist), 1/2 cup of other vegetables or 1/2 cup of vegetable juice, 1 medium fruit (medium is defined as the size of a baseball), or 1/2 cup chopped, cooked or canned fruit; or 1/2 cup juice. Therefore, we decided to consider one serving of fruit/vegetables as ½ cup, which covers the majority of the food items and is consistent with how other studies coded their cups of fruit and vegetables per day for the CVH score. 
+
+
+Component 2: Fish (preferably oily fish) ≥ two 3.5-oz servings per week 
+
+MESA variables used:
+fgfish1c, Food group: Fish
+
+How it was coded:
+Fish consumption per week was calculated by multiplying the food group servings per day by 7. If participants consumed ≥ 2 servings per week, they were coded as a Yes/Criteria met; < 2 servings was coded as No/Criteria not met.
+MESA Life’s Simple Seven / Cardiovascular Health Score (continued)
+
+Assumptions Made:
+We assumed that one serving of fish was equivalent to at least a 3.5 ounce serving of fish. The average fast food fish sandwich is 4-5 ounces; 1 piece of sushi is about one ounce. We assumed that most servings of fish were above the 3.5 ounce threshold. 
+
+
+Component 3: Sodium 
+
+MESA variables used:
+nan1c, Nutrients: Sodium (mg)
+
+How it was coded:
+Dietary sodium was estimated by multiplying the frequency and serving size for each food item from the FFQ by the nutrient content of that food sodium intake (Nutrition Data Systems for Research; University of Minnesota). Where sodium was estimated to be less than 1500 mg per day, participants were coded as Yes/Criteria met; sodium > 1500 mg per day was coded as No/Criteria not met.  
+
+Component 4: Sugar Sweetened Beverages <= 450 kcals (36 oz) per week
+
+MESA variables used:
+frqorangejuice1, Frequency of Orange juice
+srvorangejuice1,  Serving size of Orange juice
+frqotherjuice1, Frequency of  Other juice
+srvotherjuice1,  Serving size of Other juice
+frqsoda1,  Frequency of Soda
+srvsoda1,  Serving size of Soda
+frqsugarcoffeetea1,  Frequency of  Sugar in Coffee/Tea
+srvsugarcoffeetea1,  Serving size of Sugar in Coffee/Tea
+frqsweetmilk1, Frequency of Sweet milk
+srvsweetmilk1, Serving size of Sweet milk
+frqinstant1,  Frequency of Instant breakfast
+srvinstant1,  Serving size of Instant breakfast
+frqcocoa1,  Frequency of  Hot cocoa
+srvcocoa1,  Serving size of Hot cocoa
+addqcalciumfort1, Added: Calcium-fortified juice
+addqvitcfort1, Added: Vitamin C-fortified juice
+gender1, Gender
+age1c, Age at Exam 1
+
+MESA Life’s Simple Seven / Cardiovascular Health Score (continued)
+
+How it was coded:
+In order to determine whether participants were above or below the threshold for sugar sweetened beverages, we needed to convert the FFQ food items into some measure of weight. The Data System for Research (NDSR) from the University of Minnesota was used to calculate the weights of food in grams. We then converted the gram weights to monthly ounces and summed all of the sugar sweetened beverages. Items included orange juice, other juice, soda, coffee or tea with sugar, sweet milk, instant breakfast, and hot cocoa. We divided the sum of the items by four to get the weekly intake. If weekly intake of sugar sweetened beverages was less than or equal to 36 ounces, participants were coded as Yes/Criteria met. If weekly intake was greater than 36 ounces, participants were coded as No/Criteria not met. 
+
+Assumptions made:
+MESA FFQ did not give a standard measurement to any particular serving size. The gram weights are assigned based on specific sex and age categories.  It assumes that portion size differs among men and women, across age groups, and across different food items. 
+
+Component 5: Fiber rich whole grains (>1.1 g of fiber per 10 g of carbs): >= 3 1 oz equivalent servings per day
+
+MESA variables used: 
+fgwholegrain1c, Food Group: Whole Grain
+
+How it was coded:
+If servings of whole grains was greater than or equal to 3 per day, participants were coded as Yes/Criteria met. If servings of whole grains was less than 3, participants were coded as No/Criteria not met. 
+
+Assumptions made:
+We assumed that 1 serving of whole grains was approximately a 1 ounce serving. 
+
+Physical Activity
+
+MESA variables used:
+q09wmcn1,  Moderate walking exercise (min/wk)
+q10smcn1,  Moderate dance (min/wk)
+q13smcn1,  Moderate individual activities (min/wk)
+q14cmcn1,  Moderate conditioning (min/wk)
+q11svcn1,  Vigorous team sports (min/wk)
+q12svcn1,  Vigorous dual sports (min/wk)
+q15cvcn1,  Vigorous conditioning (min/wk)
+
+MESA Life’s Simple Seven / Cardiovascular Health Score (continued)
+
+How it was coded:
+Moderate activities and vigorous activities were summed separately. Participants were classified as poor for the CVH metric if their moderate and vigorous physical activity minutes per week totaled zero. Participants were classified as intermediate if their moderate physical activity was between 0 and 150 min/wk, if their vigorous activity was between 0 and 75 min/week, or if their combined moderate and vigorous activity combined was between 0 and 150 min/wk. Participants were classified as ideal if their moderate physical activity was 150 min/wk or greater, if their vigorous activity was 75 min/wk or greater, or their combined moderate and vigorous activity was 150 min/wk or greater.
+
+Assumptions made:
+MESA collected information on a longer list of moderate and vigorous activities. The guidelines mention only intentional physical activity. When we originally used the MESA variables total moderate and total vigorous activity, we had a significantly more active population than the sample used from NHANES and the replicated results from ARIC. We then switched to reflect intentional physical activity only, resulting in similar numbers to the other two samples. 
+
+Sources
+
+Lloyd-Jones DM, et. al. Defining and Setting National Goals for Cardiovascular Health Promotion and Disease Reduction, The American Heart Association’s Strategic Impact Goal Through 2020 and Beyond. Circulation. 2010; 121: 586-613.
+
+Folsom AR, Yatsuya H, Nettleton JA, Lutsey PL, Cushman M, and Rosamond WD. Community Prevalence of Ideal Cardiovascular Health, by the AHA Definition, and Relation to Cardiovascular Incidence. Journal of the American College of Cardiology. 2001; 57(16): 1690-1696.
+
+
+Physical activity   
+
+By category level – minutes per week
+
+hsemn1c = Household chores – Light effort + Moderate effort	
+yrdmn1c = Lawn/Yard/Garden/Farm work – Moderate effort + Heavy effort
+caremn1c = Child & Adult care – Light effort + Moderate effort
+trnmn1c = Drive or ride in car or bus
+walkmn1c = Non-work walking – To get places + For exercise or pleasure
+sptnmn1c = Dancing + Three types of sport activities
+condmn1c = Conditioning – Moderate effort + Heavy Effort
+leismn1c = Leisure time activities – Sit or recline + Read, knit, sew, etc.
+
+By category level – MET levels
+
+hsemt1c	Household chores min/wk – Light effort * 2.5 + Moderate effort * 4.0
+yrdmt1c	Lawn/Yard/Garden/Farm work min/wk – Moderate effort * 4.0 + Heavy effort * 6.5
+caremt1c	Child & Adult care min/wk – Light effort *2.5 + Moderate effort * 4.0
+trnmt1c	Drive or ride in car or bus min/wk * 1.5
+walkmt1c	Non-work walking min/wk – To get places *3.0 + For exercise or pleasure * 3.5
+sptnmt1c	Min/wk for Dancing *5.0 + Team sports * 7.0 + Dual sports * 7.0 + Individual activities * 3.5
+condmt1c	Conditioning min/wk – Moderate effort *5.5 + Heavy Effort * 7.0
+leismt1c	Leisure time activities min/wk – Sit or recline * 1.0 + Read, knit, sew, etc * 1.5
+
+Occupational and volunteer activities – minutes per week
+
+occmn1c	Occupation-paid work – Light effort, sitting + Light effort, standing + Moderate effort + Heavy effort	
+volmn1c	Volunteer activity – Light effort + Moderate effort + Heavy effort
+
+Occupational and volunteer activities – MET levels
+
+occmt1c	Occupation-paid work min/wk – Light effort, sitting * 1.5 + Light effort, standing * 2.5 + Moderate effort *3.0 + Heavy effort * 7.0
+volmt1c	Volunteer activity min/wk – Light effort *1.5 + Moderate effort * 3.0 + Heavy effort * 6.5
+
+Intensity level
+
+PAHRDY1C	((Total Light+Moderate+Vigorous activities min/wk) /60)/7
+WKHRWK1C	Reported total work hours per week: occmn1c/60
+EXERCM1C	Total intentional exercise (Q9-15) MET-min/wk : 
+
+Moderate Physical Activity Total (MET-min/wk M-Su)
+
+NUMERIC pamcm1c (F8.2).
+EXECUTE. 
+
+COMPUTE pamcm1c = q02hmcm1 + q03ymcm1 + q06omcm1 + q08wmcm1 + q09wmcm1 
++ q10smcm1 + q13smcm1 + q14cmcm1 + q22jmcm1 + q26umcm5.
+EXECUTE.
+
+VARIABLE LABEL pamcm1c "MODERATE PHYSICAL ACTIVITY TOTAL 
+(MET-MIN/WK M-SU)".
+EXECUTE. 
+
+Vigorous Physical Activity Total (MET-min/wk M-Su)
+
+NUMERIC pavcm1c (F8.2).
+EXECUTE. 
+
+COMPUTE pavcm1c = q04yvcm1 + q11svcm1 + q12svcm1 + q15cvcm1 + q23jvcm1 
++ q27uvcm1.
+EXECUTE.
+
+VARIABLE LABEL pamvcm1c "MODERATE AND VIGOROUS PHYSICAL ACTIVITY 
+TOTAL (MET-MIN/WK M-SU)".
+EXECUTE.
+
+Moderate and Vigorous Physical Activity Total (MET-min/wk M-Su)
+
+NUMERIC pamvcm1c (F8.2).
+EXECUTE. 
+
+COMPUTE pamvcm1c = pamcm1c + pavcm1c.
+EXECUTE.
+
+VARIABLE LABEL pamvcm1c "MODERATE AND VIGOROUS PHYSICAL ACTIVITY 
+TOTAL (MET-MIN/WK M-SU)".
+EXECUTE.
+
+Health and Life
+
+Spielberger trait anger scale
+
+SPLANG1C = sum of scores for 10 items (qktempr1, frtempr1, hothead1, angry1, annoyed1, flyoff1, nasty1, furious1, frushit1, infurat1)
+
+Assign scores 1, 2, 3, 4 from “almost never” to “almost always”.
+If more than 2 items are missing, do not score.
+If 1-2 items are missing, assign value of 1 to missing items.
+ Spielberger trait anxiety scale
+
+SPLANX1C = sum of scores for 10 items (steady1, satisf1, nervous1, unhappy1, failure1, turmoil1, secure1, noconf1, inadeqt1, worry1)
+
+Assign scores as follows:
+For nervous1, unhappy1, failure1, turmoil1, noconf1, inadeqt1, and worry1:
+Score 1,2,3,4 from “almost never to almost always”.
+
+For steady1, satisf1, and secure1:
+Score 4,3,2,1 from “almost never to almost always”.
+
+If more than 2 items are missing, do not score.
+If 1-2 items are missing, determine mean score across items completed, multiply by 10 and round to nearest whole number.
+
+Chronic burden
+
+CHRBUR1C = total number of items to which response is 1 =Yes for (hprb1pt1, hprb1ot1, job1prb1, mon1prb1, rel1prb1).
+
+If any items are missing, do not code.
+
+Chronic burden 6 months or more
+
+CHRBU61C1 = total number of items to which response is 1 =Yes for (hprb2pt1, hprb2ot1, job2prb1, mon2prb1, rel2prb1).
+
+If any items are missing, do not code.
+
+CES-D (Center for Epidemiologic Studies – Depression) Scale
+
+CESD1C = sum of scores for the 20 items of the CES-D Scale (bother1, noteat1, blue1, asgood1, concntr1, depress1, effort1, hopeful1, lffail1, fearful1, badslp1, happy1, lestalk1, lonely1, unfrnly1, enjlife1, cryspel1, sad1, dislikd1, getgoin1)
+
+Assign scores as follows:
+For asgood1, hopeful1, happy1, enjlife1:
+Score 3, 2, 1, 0 (rarely to most)
+
+For bother1, noteat1, blue1, concntr1, depress1, effort1, lffail1, fearful1, badslp1, lestalk1, lonely1, unfrnly1, cryspel1, sad1, dislikd1, getgoin1:
+Score 0,1,2,3 (rarely to most).
+
+If more than 5 items are missing, score is not calculated. 
+If 1-5 items are missing, sum scores for completed items, divide total by number answered and multiply by 20.
+
+Emotional Social Support Index
+
+EMOT1C = sum of scores for 6 items (talkto1, advice1, affectn1, hlpchr1, emospt1, confide1).
+
+Assign scores 1,2,3,4,5 from “none of the time” to “all of the time”.
+If any items are missing, do not score.
+
+Perceived discrimination
+
+Lifetime:
+DISCRL1C = total number of items to which response is 1 = Yes for (uf1fire1, uf1hire1, uf1stop1, uf1educ1, uf1move1, uf1nghb1).
+
+If any items are missing, do not code.
+
+Past year:
+DISCRY1C = total number of items to which response is 1 = Yes for (uf3fire1, uf3hire1, uf3stop1, uf3educ1, uf3move1, uf3nghb1).
+
+If any items are missing, do not code.
+
+Everyday hassles
+
+HASSL1C = sum of scores for 9 items (curtesy1, respect1, service1, smart1, afraid1, dishon1, better1, insult1, threat1).
+
+Assign scores 6,5,4,3,2,1 from “almost every day” to “never”.
+If any items are missing, do not score.
+
+
+Neighborhood
+
+Neighborhood social cohesion
+
+Assign scores as follows:
+For asgood1, hopeful1, happy1, enjlife1: 
+Score 3, 2, 1, 0 (rarely to most)
+
+NCOHES1C = sum of scores for the 5 items related to neighborhood social cohesion (nclose1, nhelp1, ndgalng1, ntrust1, nvalues1)
+
+Assign scores as follows:
+For nclose1, nhelp1, ntrust1:
+Score 5, 4, 3, 2, 1
+to the “strongly agree  strongly disagree” continuum as follows:
+5  1 (decreasing order) for (nclose1, nhelp1, ntrust1)
+1   5 (increasing order) for (ndgalng1, nvalues1)
+The resulting score increases with increasing cohesion.
+If any items are missing, do not score.
+
+Neighborhood problems
+
+NPROB1C = sum of scores for 7 items related to neighborhood problems (nnoise1, ntraf1, nlfshop1, nlparks1, ntrash1, nsdwlk1, nviolen1).
+Assign scores 4,3,2,1 for “very serious problem” to “not really a problem”.
+If any items are missing, do not score.
+
+Years Lived in Current Neighborhood
+
+COMPUTE nhdtim1c = nhdyrs1.
+EXECUTE.
+Family History
+
+Family History of MI 
+
+compute fhmi2=0.
+IF (fhxsex2=1 AND fhxmia2<=55 AND fhxbrel2=1 AND fhxmi2=1) fhmi2=1.
+IF (fhxsex2=0 AND fhxmia2<=65 AND fhxbrel2=1 AND fhxmi2=1) fhmi2=1.
+Execute.
+
+Family relations limited to Mother, Father, Siblings and Children 
+
+[fhmi2] computed to 1 (Yes) if the following conditions met:
+
+For female relatives:
+Blood relation [fhxbrel2] equals 1 (Yes) AND
+Family History of MI [fhxmi2] equals 1 (Yes) AND
+Age of first MI diagnosis [fhxmia2] equal to or less than 65
+
+For male relatives:
+Blood relation [fhxbrel2] equals 1 (Yes) AND
+Family History of MI [fhxmi2] equals 1 (Yes) AND
+Age of first MI diagnosis [fhxmia2] equal to or less than 55
+
+Otherwise, [fhmi2] computed to 0 (No)
+
+
+Family History of Stroke 
+
+compute fhstk2=0.
+IF (fhxsex2=1 AND fhxstka2<=55 AND fhxbrel2=1 AND fhxstk2=1) fhstk2=1.
+IF (fhxsex2=0 AND fhxstka2<=65 AND fhxbrel2=1 AND fhxstk2=1) fhstk2=1.
+Execute.
+
+Family relations limited to Mother, Father, Siblings and Children 
+
+[fhstk2] computed to 1 (Yes) if the following conditions met:
+
+For female relatives:
+Blood relation [fhxbrel2] equals 1 (Yes) AND
+Family History of Stroke [fhxstk2] equals 1 (Yes) AND
+Age of first Stroke diagnosis [fhxstk2] equal to or less than 65
+
+For male relatives:
+Blood relation [fhxbrel2] equals 1 (Yes) AND
+Family History of Stroke [fhxstk2] equals 1 (Yes) AND
+Age of first Stroke diagnosis [fhxstk2] equal to or less than 55
+
+Otherwise, [fhstk2] computed to 0 (No)
+
+
+Family History of Cardiac Procedure 
+
+compute fhcrd2=0.
+IF (fhxsex2=1 AND fhxcrda2<=55 AND fhxbrel2=1 AND fhxcrd2=1) fhcrd2=1.
+IF (fhxsex2=0 AND fhxcrda2<=65 AND fhxbrel2=1 AND fhxcrd2=1) fhcrd2=1.
+Execute.
+
+Family relations limited to Mother, Father, Siblings and Children 
+
+[fhcrd2] computed to 1 (Yes) if the following conditions met:
+
+For female relatives:
+Blood relation [fhxbrel2] equals 1 (Yes) AND
+Family History of Cardiac Procedure [fhxcrd2] equals 1 (Yes) AND
+Age of first Cardiac Procedure diagnosis [fhxcrd2] equal to or less than 65
+
+For male relatives:
+Blood relation [fhxbrel2] equals 1 (Yes) AND
+Family History of Cardiac Procedure [fhxcrd2] equals 1 (Yes) AND
+Age of first Cardiac Procedure diagnosis [fhxcrd2] equal to or less than 55
+
+Otherwise, [fhcrd2] computed to 0 (No)
+
+Family History of Premature CVD 
+
+compute fhprcvd2=0.
+if(fhmi2=1 or fhcrd2=1 or fhstk2=1) fhprcvd2=1.
+execute.
+
+Family relations limited to Mother, Father, Siblings and Children 
+
+[fhprcvd2] computed to 1 (Yes) if the following conditions met:
+Family History of MI [fhmi] equals 1 (Yes) OR 
+Family History of Stroke [fhcrd] equals 1 (Yes) OR
+Family History of Stroke [fhstk] equals 1 (Yes)
+Blood Lab Measures
+
+NOTE:  All lipid categories determined by NCEP 2001 guidelines; reference 4
+
+Serum Hemoglobin A1C
+
+SPSS Syntax:
+RENAME VARIABLE hemogl2 = hba1c.
+EXECUTE.
+
+Total Cholesterol, NCEP Categories
+CHLCAT1C = 3	High			Cholesterol ≥ 240 mg/dL
+CHLCAT1C = 2	Borderline High	Cholesterol 200-239 mg/dL
+CHLCAT1C = 1	Desirable		Cholesterol < 200 mg/dL
+
+LDL Cholesterol, NCEP Categories
+LDLCAT1C = 5	Very High		LDL cholesterol ≥ 190 mg/dL
+LDLCAT1C = 4	High			LDL cholesterol 160-189 mg/dL
+LDLCAT1C = 3	Borderline High	LDL cholesterol 130-159 mg/dL
+LDLCAT1C = 2	Near Optimal		LDL cholesterol 100-129 mg/dL
+LDLCAT1C = 1	Optimal		LDL cholesterol < 100 mg/dL
+
+HDL Cholesterol, NCEP Categories
+HDLCAT1C= 3	Low	HDL < 40 mg/dL
+HDLCAT1C= 2		HDL 40-59 mg/dL
+HDLCAT1C= 1	High	HDL  ≥ 60 mg/dL
+
+Triglycerides, NCEP Categories
+TRGCAT1C = 4	Very High	      	Triglycerides   ≥ 500 mg/dL
+TRGCAT1C = 3	High			Triglycerides 200-499 mg/dL
+TRGCAT1C = 2	Borderline High	Triglycerides 150-199 mg/dL
+TRGCAT1C = 1	Normal	      	Triglycerides < 150 mg/dL
+
+Blood Group 3 Indicator
+
+SPSS Syntax:
+NUMERIC group31c (f8.0).
+EXECUTE.
+
+COMPUTE group31c=0.
+IF(eselect1>0) group31c=1.
+EXECUTE.
+
+VARIABLE LABEL group31c "Lipids Blood Group 3 Indicator".
+VALUE LABEL group31c 0 "0: No" 1 "1: Yes".
+EXECUTE.Serum Insulin Calibration
+
+MESA has calibrated all serum insulin assay results (from Exam 1 [Beckman Access], MESA Family [Mercodia], and Exam 5 [Elecsys]) on the same scale (Elecsys assay used at Exam 5).
+
+* Calibrate insulin from Beckman to Elecsys standard using Craig's slope/intercept algorithm.
+
+Compute inslnr1t = (0.208 * (Insulin1 * 6.0)) + 1.656.
+Execute.
+
+* Use Family-cohort recoded Insulin for Family cohort, which uses a Mercodia-Elecsys calibration.
+
+if (family=1) inslnr1t=inslnr1c_fam.
+Execute.
+
+Variable [inslnr1c_fam] was computed for the family cohort according to the following calibration equation:
+(x=Mercodia, y=Elecsys):
+<= 30 mU/L (y = 0.9004x - 0.0594) and 
+>  30 mU/L (y = 1.0602x - 5.3762)
+
+* Recode 114 cases that were re-assayed using Elecysys standard; no need for further calibration.
+
+if (InsulinRA>0) inslnr1t=InsulinRA.
+Execute.
+
+
+
+Calibration Background:
+We would like to compare the new Serum Insulin assay at Exam 5 with serum insulin values obtained from an old assay performed at Exam 1.
+115 randomly selected specimens within Exam 1 insulin value decile strata were selected for reassay with the Exam 5 methods.
+mIU/L to pmol/L unit conversion factor is 6.0
+
+Table 1a: Descriptive Summary of Exam 5 Insulin assays
+
+
+
+
+
+
+Table 2: Descriptive Summary of Paired Comparability values
+
+
+Figure 1: Scatterplot
+
+
+Comment 1: Values above ~100 umol/L will not be well estimated by this data.
+Comment 2: the two most extreme values are dropped from analyses (until additional samples can be run).
+
+Figure: Sacatterplot of New Insulin Assay predicting old Insulin assay values
+
+
+
+Correlations
+
+
+
+
+
+Linear Regression
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Glomerular Filtration Rate (GFR)
+
+Estimated Glomerular filtration rate by simplified MDRD (Modification of Diet in Renal Disease study) equation:
+
+GFR (mL/min/1.73 m2) = 186 x (Scr)-1.154 x (Age)-0.203 x (0.742 if female) x (1.212 if African American)
+
+SPSS Syntax: 
+
+compute creatin1 = (creatin1 * 0.9954) + 0.0208.
+execute.
+
+IF (race1c~=3) notblack=1 .
+IF (race1c=3)  notblack=0 .
+COMPUTE notblack = SUM(notblack, 0) .
+VALUE LABELS notblack 1 '1: not AA' 0 '0: AA' .
+EXECUTE .
+
+COMPUTE egfr1c = 186 * (creatin1**(-1.154)) * (age1c**-0.203) * (0.742 + 0.258*gender1) * (1.212 - 0.212*notblack) .
+
+Online reference:
+http://www.nkdep.nih.gov/labprofessionals/estimating_gfr.htm#mdrd
+
+Glomerular Filtration Rate Using CKD-EPI Equation
+
+Estimated Glomerular filtration rate using calibrated Creatinine (calibrated to Cleveland Clinic standard). Please note: calibrated creatinine is used for CKD-EPI eGFR but not for eGFR calculated using MDRD equation.
+
+(For Exams 1, 3 and 4)
+
+Calibration to Cleveland Clinic Standard
+COMPUTE crclb1 = 0.9954*creatin1+0.0208 .
+VARIABLE LABELS crclb1 ' Exam 1 calibrated creatinine'.
+
+CKD-EPI eGFR Equations
+if(race1c=3 & gender1=0 & crclb1 <= 0.7) cepgfr1c = 166 * (crclb1/0.7)**(-0.329) * 0.993**age1c.
+if(race1c=3 & gender1=0 & crclb1 >  0.7) cepgfr1c = 166 * (crclb1/0.7)**(-1.209) * 0.993**age1c.
+if(race1c=3 & gender1=1 & crclb1 <= 0.9) cepgfr1c = 163 * (crclb1/0.9)**(-0.411) * 0.993**age1c.
+if(race1c=3 & gender1=1 & crclb1 >  0.9) cepgfr1c = 163 * (crclb1/0.9)**(-1.209) * 0.993**age1c.
+if(race1c~=3 & gender1=0 & crclb1 <= 0.7) cepgfr1c = 144 * (crclb1/0.7)**(-0.329) * 0.993**age1c.
+if(race1c~=3 & gender1=0 & crclb1 >  0.7) cepgfr1c = 144 * (crclb1/0.7)**(-1.209) * 0.993**age1c.
+if(race1c~=3 & gender1=1 & crclb1 <= 0.9) cepgfr1c = 141 * (crclb1/0.9)**(-0.411) * 0.993**age1c.
+if(race1c~=3 & gender1=1 & crclb1 >  0.9) cepgfr1c = 141 * (crclb1/0.9)**(-1.209) * 0.993**age1c.
+variable label cepgfr1c 'exam 1 (calibrated cr) eGFR using CKD-EPI equation'.
+execute. 
+Reference for CKD-EPI equation
+http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2763564/
+
+Description of MESA calibration to Cleveland Clinic standard for creatinine
+http://www.mesa-nhlbi.org/MesaInternal/documents/2006/MESACreatinineGFRRecommendation_12-6-2006.doc
+
+
+Urinary Measures
+
+Urinary microalbuminuria from spot urine measurement, albumin(mg) / creatinine (g); reference 5
+
+UABCAT1C = 3	Macroalbuminuria  	alb(mg)/cre(g)	 > 300  
+UABCAT1C = 2	Microalbuminuria  	alb(mg)/cre(g)	 30-300
+UABCAT1C = 1	Normal 		alb(mg)/cre(g)	 < 30 
+ECG Measures
+
+
+ABNORMALITIES PER NOVACODE
+
+Left Ventricular Hypertrophy by Novacode
+ECGLVH1C = 1	If ncsp61 = “6.1.1” (If Novacode 6.1.1 is present)
+ECGLVH1C = 0	Otherwise
+
+Atrial Fibrillation / Flutter by Novacode
+AFIB1C = 1	If any of (ncvp1a1, ncvp1b1, ncvp1c1, ncvp1d1, ncvp1e1, ncvp1f1, ncvp1g1) = “1.5.1” or “1.5.2” or “1.5.3” (If Novacode 1.5.1 or 1.5.2 or 1.5.3 is present)
+AFIB1C = 0	Otherwise
+
+ABNORMALITIES PER MINNESOTA CODES
+
+Any Major ECG Abnormalities per Minnesota Code
+
+NUMERIC majabn1c (F8.0).
+EXECUTE.
+
+COMPUTE majabn1c=0.
+EXECUTE.
+
+IF(major11>0) majabn1c=1.
+IF(major21>0) majabn1c=1.
+IF(major31>0) majabn1c=1.
+IF(major41>0) majabn1c=1.
+IF(major51>0) majabn1c=1.
+IF(major61>0) majabn1c=1.
+IF(major7a1>0) majabn1c=1.
+IF(major7b1>0) majabn1c=1.
+IF(major7c1>0) majabn1c=1.
+IF(major7d1>0) majabn1c=1.
+IF(major81>0) majabn1c=1.
+IF(major91>0) majabn1c=1.
+IF(major10a1>0) majabn1c=1.
+IF(major10b1>0) majabn1c=1.
+IF(major10c1>0) majabn1c=1.
+EXECUTE.
+
+VARIABLE LABELS majabn1c "Any Major ECG Abnormalities per Minnesota Code".
+VALUE LABELS majabn1c 0 "No" 1 "Yes".
+EXECUTE.
+ABNORMALITIES PER MINNESOTA CODES
+
+Any Minor ECG Abnormalities per Minnesota Code
+
+NUMERIC minabn1c (F8.0).
+EXECUTE.
+
+COMPUTE minabn1c=0.
+EXECUTE.
+
+IF(minor11>0) minabn1c=1.
+IF(minor21>0) minabn1c=1.
+IF(minor31>0) minabn1c=1.
+IF(minor4l1>0) minabn1c=1.
+IF(minor4f1>0) minabn1c=1.
+IF(minor4v1>0) minabn1c=1.
+IF(minor5l1>0) minabn1c=1.
+IF(minor5r1>0) minabn1c=1.
+IF(minor61>0) minabn1c=1.
+IF(minor71>0) minabn1c=1.
+IF(minor81>0) minabn1c=1.
+IF(minor91>0) minabn1c=1.
+IF(minor101>0) minabn1c=1.
+IF(minor11a1>0) minabn1c=1.
+IF(minor11b1>0) minabn1c=1.
+IF(minor11c1>0) minabn1c=1.
+IF(minor11d1>0) minabn1c=1.
+IF(minor11e1>0) minabn1c=1.
+IF(minor11f1>0) minabn1c=1.
+IF(minor11g1>0) minabn1c=1.
+EXECUTE.
+
+VARIABLE LABELS minabn1c "Any Minor ECG Abnormalities per Minnesota Code".
+VALUE LABELS minabn1c 0 "No" 1 "Yes".
+EXECUTE.
+
+Ultrasound: IMT
+
+Carotid intimal-medial thickness (IMT), in millimeters
+
+The computed variables of MAXCOM1C and MAXINT1C reflect the mean of all available maximum wall thicknesses across all scans, across both left and right sides, and across the near and far walls for the common and internal carotid variables, respectively.
+	
+MAXCOM1C = mean (rcfwmax1, rcnwmax1, lcfwmax1, lcnwmax1)
+
+MAXINT1C = mean (rafwmax1, ranwmax1, rlfwmax1, rlnwmax1, rpfwmax1, rpnwmax1, lafwmax1, lanwmax1, llfwmax1, llnwmax1, lpfwmax1, lpnwmax1)
+
+Maximum carotid stenosis, graded
+
+MAXSTN1C = max (rsten1, lsten1) for values of rsten1 and lsten1 which indicate a stenosis.
+When one side indicated “bad image”, or “can’t tell” and the other side had a valid value, the valid measure was taken as the maximum.
+	
+	0 = No Lesion
+	1 = 1-24%
+	2 = 25-49%
+	3 = 50-74%
+	4 = 75-99%
+	5 = 100%
+
+Maximum surface
+
+MAXSUR1C = max (rsurf1, lsurf1) for values of rsurf1 and lsurf1 which indicate a lesion.
+When one side indicated  “can’t tell” and the other side had a valid value, the valid measure was taken as the maximum.
+	
+	0 = Smooth
+	1 = Mildly Irregular
+	2 = Markedly Irregular
+	3 = Ulcerated
+	6 = No Lesion
+Maximum morphology
+
+MAXMOR1C = max (rmorph1, lmorph1) 
+	for values of rmorph1 and lmorph1 which indicate a lesion.
+When one side indicated  “can’t tell” and the other side had a valid value, the valid measure was taken as the maximum.
+	
+	0 = No Lesion
+	1 = Homogeneous
+	2 = Heterogeneous
+
+Maximum density
+
+MAXDEN1C = max (rdens1, ldens1) for values of rdens1 and ldens1 which indicate a lesion.
+When one side indicated  “can’t tell” and the other side had a valid value, the valid measure was taken as the maximum.
+	
+	0 = No Lesion
+	1 = Hypodense
+	2 = Isodense
+	3 = Hyperdense
+	4 = Calcified	
+
+Z-Score Maximum IMT
+
+ZMXIMT1C = A composite Z score for overall maximal IMT by summing the two carotid IMT sites (maxcom1c and maxint1c) after standardization (subtraction of the mean and division by the standard deviation of each measure), then dividing by the standard deviation of the sum. If only one of the two measures was available, it was used.
+
+For further details, please refer to paper “Coronary Artery Calcification Compared with Carotid Intima-Media Thickness in Prediction of Cardiovascular Disease Incidence: The Multi-Ethnic Study of Atherosclerosis (MESA)” by (Aaron R. Folsom, MD, Richard A. Kronmal, PhD, Robert C. Detrano, MD, PhD, Daniel H. O’Leary, MD, Diane E. Bild, MD, David A. Bluemke, MD, PhD, Matthew J. Budoff, MD, Kiang Liu, PhD, Steven Shea, MD, Moyses Szklo, MD, DrPH, Russell P. Tracy, PhD, Karol E. Watson, MD, PhD, and Gregory L. Burke, MD) in Archives of Internal Medicine (Arch Intern Med. 2008 June 23; 168(12): 1333–1339. )
+
+
+
+Ultrasound: Brachial artery endothelial function
+
+Version 1: Change in Brachial Artery Diameter
+
+
+Raw (arithmetic) change (mm)
+V1RAW1C	= rsda1 – s1dma1
+
+where  RSDA1 = Response edge detected average diameter (mm);
+	      S1DMA1 =  Stream 1 edge detected average diameter (mm);
+
+Raw percent change 
+V1RPC1C	= 100* (rsda1 – s1dma1) / s1dma1
+
+Version 2: Change in Brachial Artery Diameter
+
+Raw (arithmetic) change (mm)
+V2RAW1C	= rsda1 – rdma1
+
+where  rsda1 = Response edge detected average diameter (mm);
+	      rdma1 =  Release edge detected average diameter (mm);
+
+Raw percent change 
+V2RPC1C	= 100* (rsda1 – rdma1) / rdma1
+
+MRI Measures
+
+Aortic Distensibility
+
+AODIS1C =   [(oaormx1 – oaormn1) / oaormn1] / mripp1
+
+where	oaormx1 = maximum aortic cross-sectional area;
+oaormn1 = minimum aortic cross-sectional area; and 
+mripp1 =  the average of the pulse pressures from the brachial blood pressures measured before and after Series 7 in the MRI exam
+			   	   =  [(presys1 - predia1) + (postsys1 - postdia1)] / 2
+
+UPDATE:  variable [AODIS1C] has been removed from the Exam 1 dataset and replaced with variable [oardis1]. This new variable was provided by the MRI Center and computed using the same equation. The MRI Reading Center has assured the Coordinating Center it is confident in the 
+
+Average Aortic Diameter
+
+AAD1C =    [2 * sqrt(oaormn1 / pi) + 2 * sqrt(oaormx1 / pi)] / 2,
+
+where pi = 3.14159
+
+
+
+CT Measures
+
+
+PHOK1C	Indicator specifying whether or not phantom data (and thus the phantom adjustment) were valid for a particular scan.  Missing phantom data are by definition “invalid.”
+	
+	PHOK1C	=1	Phantom data/adjustment valid
+			=0	Phantom /data adjustment not valid
+
+Each of the measures below is the sum of the corresponding measures from the left anterior descending, circumflex, left and right coronary arteries.
+
+Agatston calcium score  
+
+Unadjusted = slft1 + slad1 + scrc1 + srt1
+
+AGATU1C	Defined for each scan	(CT RC data file)
+AGATU11C	Scan 1, defined for each participant (main data file)
+AGATU21C	Scan 2, defined for participants with 2 scans (main data file)
+AGATUM1C	mean(AGATU11C,AGATU21C),  average of scans 1 and 2 (main data file)
+
+Phantom-adjusted = pslft1 + pslad1 + pscrc1 + psrt1 	if PHOK1C=1
+  = slft1 + slad1 + scrc1 + srt1		if PHOK1C=0
+
+AGATP1C	Defined for each scan	(CT RC data file)
+AGATP11C	Scan 1, defined for each participant (main data file)
+AGATP21C	Scan 2, defined for participants with 2 scans (main data file)
+AGATPM1C	mean(AGATP11C,AGATP21C), average of scans 1 and 2 (main data file)
+
+Total calcium volume 
+
+Unadjusted = vlft1+ vlad1 + vcrc1 + vrt1
+
+VOLU1C		Defined for each scan	(CT RC data file)
+VOLU11C		Scan 1, defined for each participant (main data file)
+VOLU21C		Scan 2, defined for participant w/ 2 scans (main data file)
+VOLUM1C	mean(VOLU11C, VOLU21C), average of scans 1 and 2 (main data file)
+
+Phantom-adjusted = pvlft1+pvlad1+pvcrc1+pvrt1		if PHOK1C=1
+ = vlft1+ vlad1 + vcrc1 + vrt1		if PHOK1C=0
+
+VOLP1C		Defined for each scan	(CT RC data file)
+VOLP11C		Scan 1, defined for each participant (main data file)
+VOLP21C		Scan 2, defined for participants w/ 2 scans (main data file)
+VOLPM1C	mean(VOLP11C, VOLP21C), average of scans 1 and 2 (main data file)
+
+
+Total isometric volume score 
+
+Unadjusted = vslft1 +  vslad1 + vscrc1 + vsrt1
+
+VOLSU1C	Defined for each scan	(CT RC data file)
+VOLSU11C	Scan 1, defined for each participant (main data file)
+VOLSU21C	Scan 2, defined for participant w/ 2 scans (main data file)
+VOLSUM1C	mean(VOLSU11C, VOLSU21C), average of scans 1 and 2 (main data file)
+
+Phantom-adjusted = pvslft1 +  pvslad1 + pvscrc1 + pvsrt1	if PHOK1C=1
+  = vslft1 +  vslad1 + vscrc1 + vsrt1		if PHOK1C=0
+
+VOLSP1C		Defined for each scan	(CT RC data file)
+VOLSP11C	Scan 1, defined for each participant (main data file)
+VOLSP21C	Scan 2, defined for participants w/ 2 scans (main data file)
+VOLSPM1C	mean(VOLSP11C, VOLSP21C), average of scans 1 and 2 (main data file)
+VOSPM1C	mean(VOLSP1C)
+		
+
+Arterial Mass Measure 
+mlft1 + mlad1 + mcrc1 + mrt1
+
+MASS1C		Defined for each scan	(CT RC data file)
+MASS11C 	Scan 1, defined for each participant (main data file)
+MASS21C		Scan 2, defined for participants w/ 2 scans (main data file)
+MASSM1C	mean(MASS11C, MASS21C), average of scans 1 and 2 (main data file)
+
+Factor VIII
+
+f81c = 7.123025 + ( 0.5611548 * f81 )
+
+Factor VIIIc levels were determined by measuring the clot time of a sample in factor VIIIc deficient plasma in the presence of activators utilizing the Sta-R analyzer (STA-Deficient VIII; Diagnostica Stago, Parsippany, NJ). The results are given as percent factor VIII, with reported normal plasma range of factor VIII in the adult population between 60 and 150%. 
+
+The analytical CV was __%. The FVIIIc standard curve is linear in a limited range, so samples were diluted more than usual (1/40) to allow more of them to be analyzed without further redilution. However, this resulted in overall higher FVIIIc values than is seen with the original 1/10 dilution. To correct for this, we analyzed 98 samples using both dilutions and analyzed the data by regression: 
+
+Corrected Value = 0.56 Measured Value + 7.1; R = 0.78, a value consistent with the repeatability of a clot-based factor assay. Based on this analysis, the MESA sample data were corrected using this relationship.
+
+Consent for Commercial Use of DNA Samples and Data
+
+Variable cucmcn1c: Current Participant Consent for Commercial Use of Data
+0: No
+1: Yes
+
+Algorithm used to compute cucmcn1c:
+
+COMPUTE cucmcn1c=999.
+EXECUTE.
+* Comment: compute [cucmcn1c] to 999 as a placeholder for conditional coding below.
+IF (comm4 = 1 or comm4 = 0) cucmcn1c = comm4.
+WHERE:
+Variable [comm4] = Exam 4 clinic reception question “Sharing of Data and Samples: Commercial”
+[comm4] value of  0 = No
+[comm4] value of  1 = Yes
+IF ((comm3=1 or comm3=0) and (cucmcn1c=999)) cucmcn1c=comm3.
+WHERE:
+Variable [comm3] = Exam 3 clinic reception question “Sharing of Data and Samples: Commercial”
+[comm3] value of  0 = No
+[comm3] value of  1 = Yes
+IF ((commg=1 or commg=0) and (cucmcn1c=999)) cucmcn1c=commg.
+WHERE:
+Variable [commg] = Exam 3 electronic data collection of question “Sharing of Data and Samples: Commercial”(original variable name in tConsent table is [Commercial])
+[commg] value of  0 = No
+[commg] value of  1 = Yes
+IF ((prvdna2=1 or prvdna2=0) and (cucmcn1c=999)) cucmcn1c=prvdna2.
+WHERE:
+Variable [prvdna2] = Exam 2 Consent for Genetics Testing: Allow private company access to DNA
+[prvdna2] value of  0 = No
+[prvdna2] value of  1 = Yes
+Consent for Commercial Use of DNA Samples and Data (continued)
+
+IF ((prvdna1=1 or prvdna1=0) and (cucmcn1c=999)) cucmcn1c=prvdna1.
+EXECUTE.
+WHERE:
+Variable [prvdna1] = Exam 1 Consent for Genetics Testing: Allow private company access to DNA
+[prvdna1] value of  0 = No
+[prvdna1] value of  1 = Yes
+
+RECODE cucmcn1c (999=0).
+EXECUTE.
+* Comment: If the previous conditions are not met, compute [cucmcn1c] recode 999 to 0 (No), since no Commercial Use consent information.
+
+To ensure its accuracy, this new Commercial Use Consent variable [cucmcn1c] has been validated against other iterations of the Commercial Consent Use variable, such as:
+[ComUs12c]  Permission to use DNA, samples, data for commercial purposes
+[consent] SHARE Commercial Consent
+[commuse] Apolipoprotein A ancillary study selection
+New variable [cucmcn1c] has been deemed valid and will be added to MESA Exam datasets. The previous Commercial Use Consent variable [ComUs12c] will be dropped from MESA Exam datasets.
+References:
+
+1.	World Health Organization Expert Committee. Physical status: the use and interpretation of anthropometry. Geneva, Switzerland: World Health Organization, 1993 (Technical Report Series 854).
+2.	1997 Joint National Committee. The sixth report of the Joint National Committee on Prevention, Detection, Evaluation and Treatment of High Blood Pressure. Arch Intern Med 1997;157(2446):2413-2446
+3.	Expert Committee on the Diagnosis and Classification of Diabetes Mellitus. Report of the Expert Committee on the Diagnosis and Classification of Diabetes Mellitus. Diabetes Care 1997;20(7):1183-1197.
+4.	Expert Panel on Detection, Evaluation, and Treatment of High Blood Cholesterol in Adutls.  Executive summary of the third report of the National Cholesterol Education Program (NCEP) Expert Panel on Detection, Evaluation, and Treatment of High Blood Cholesterol in Adults (Adult Treatment Panel III).  JAMA 2001;285:2486-2497.
+5.	American Diabetes Association. Diabetic nephropathy. Diabetes Care 1997;20 (Suppl 1):S24-S27.
+6.  D'Agostino RB, Grundy S, Sullivan LM, Wilson P, Validation of the Framingham Coronary Heart Disease Prediction Scores Results of a Multiple Ethnic Groups Investigation, JAMA, 286: 180-187, 2001.
+7.  Wilson PF, D'Agostino RB, Levy D, Belanger AM, Silberhatz H, Kannel WB, Prediction of Coronary Heart Disease Using Risk Factor Categories, Circulation, 97: 1837-1847, 1998.
+

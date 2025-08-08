@@ -21,6 +21,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a React-based MESA risk calculator application called "mesa-risk".
 
+### MESA Risk Calculation Algorithm
+
+For detailed information about the MESA CHD risk calculation algorithm, mathematical formulas, and clinical implementation, see [`MESA-CALCULATOR.md`](./MESA-CALCULATOR.md). This document contains the complete algorithm specification based on the Multi-Ethnic Study of Atherosclerosis research.
+
 ### Core Architecture
 
 - **Frontend Framework**: React 19 with Vite build tool
