@@ -5,6 +5,7 @@ export default function App() {
   const {
     formData,
     showResults,
+    riskResults,
     handleCalculate,
     handleStartOver,
     updateFormData
@@ -28,6 +29,7 @@ export default function App() {
       formData={formData}
       updateFormData={updateFormData}
       showResults={showResults}
+      riskResults={riskResults}
       onCalculate={handleCalculate}
       onStartOver={handleStartOver}
     />

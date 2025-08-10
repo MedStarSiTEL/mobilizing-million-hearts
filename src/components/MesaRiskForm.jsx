@@ -13,6 +13,7 @@ export default function MesaRiskForm({
   formData, 
   updateFormData, 
   showResults, 
+  riskResults,
   onCalculate, 
   onStartOver 
 }) {
@@ -494,15 +495,21 @@ export default function MesaRiskForm({
                     <div className="space-y-4">
                       <div className="text-center p-4 bg-green-50 rounded-lg border">
                         <div className="text-sm text-gray-600 mb-1">10-Year CHD Risk</div>
-                        <div className="text-2xl font-bold text-green-600">12.5%</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {riskResults ? `${riskResults.riskWithCAC}%` : '---'}
+                        </div>
                       </div>
                       <div className="text-center p-4 bg-blue-50 rounded-lg border">
                         <div className="text-sm text-gray-600 mb-1">Coronary Age</div>
-                        <div className="text-xl font-semibold text-blue-600">72 years</div>
+                        <div className="text-xl font-semibold text-blue-600">
+                          {riskResults ? `${riskResults.coronaryAge} years` : '--- years'}
+                        </div>
                       </div>
                       <div className="text-center p-4 bg-orange-50 rounded-lg border">
                         <div className="text-sm text-gray-600 mb-1">Age Difference</div>
-                        <div className="text-xl font-semibold text-orange-600">+7 years</div>
+                        <div className="text-xl font-semibold text-orange-600">
+                          {riskResults ? (riskResults.ageDifference >= 0 ? `+${riskResults.ageDifference} years` : `${riskResults.ageDifference} years`) : '--- years'}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -521,15 +528,21 @@ export default function MesaRiskForm({
                     <div className="space-y-4">
                       <div className="text-center p-4 bg-gray-50 rounded-lg border">
                         <div className="text-sm text-gray-600 mb-1">10-Year CHD Risk</div>
-                        <div className="text-2xl font-bold text-gray-600">8.2%</div>
+                        <div className="text-2xl font-bold text-gray-600">
+                          {riskResults ? `${riskResults.riskWithoutCAC}%` : '---'}
+                        </div>
                       </div>
                       <div className="text-center p-4 bg-blue-50 rounded-lg border">
                         <div className="text-sm text-gray-600 mb-1">Coronary Age</div>
-                        <div className="text-xl font-semibold text-blue-600">68 years</div>
+                        <div className="text-xl font-semibold text-blue-600">
+                          {riskResults ? `${Math.round(formData.age + (riskResults.riskWithoutCAC - riskResults.riskWithCAC) / 2)} years` : '--- years'}
+                        </div>
                       </div>
                       <div className="text-center p-4 bg-orange-50 rounded-lg border">
                         <div className="text-sm text-gray-600 mb-1">Age Difference</div>
-                        <div className="text-xl font-semibold text-orange-600">+3 years</div>
+                        <div className="text-xl font-semibold text-orange-600">
+                          {riskResults ? `+${Math.round((riskResults.riskWithoutCAC - riskResults.riskWithCAC) / 2)} years` : '--- years'}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
